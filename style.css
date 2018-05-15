@@ -25,3 +25,16 @@ body, html {
   bottom: 0;
   left: 0;
 }
+
+.ball {
+  position: absolute;
+  background-color: indianred;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  transition: all 0.1s ease;
+}
+
+#modelBall {
+  background-color: lightgreen;
+}
