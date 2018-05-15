@@ -207,6 +207,8 @@ $(document).ready(function() {
 
   function addExample(image, target) {
     // Given an image and target coordinates, adds them to our dataset.
+    target[0] = target[0] - 0.5;
+    target[1] = target[1] - 0.5;
     target = tf.tidy(function() { return tf.tensor1d(target).expandDims(0); });
     if (x == null) {
       x = tf.keep(image);
@@ -244,7 +246,7 @@ $(document).ready(function() {
       layers: [
         tf.layers.conv2d({
           inputShape: [inputHeight, inputWidth, 3],
-          kernelSize: 3,
+          kernelSize: 5,
           filters: 16,
           strides: 1,
           activation: 'relu',
@@ -256,17 +258,17 @@ $(document).ready(function() {
         }),
         tf.layers.flatten(),
         tf.layers.dropout({
-          rate: 0.2,
+          rate: 0.3,
         }),
         tf.layers.dense({
           units: 2,
-          activation: 'sigmoid',
+          activation: 'tanh',
           kernelInitializer: 'varianceScaling',
         }),
       ]
     });
 
-    optimizer = tf.train.adam(0.01);
+    optimizer = tf.train.adam(0.004);
 
     model.compile({optimizer: optimizer, loss: 'meanSquaredError'});
 
@@ -276,7 +278,7 @@ $(document).ready(function() {
   function fitModel(model) {
     var n = x.shape[0];
 
-    var epochs = 5 + Math.floor(n * 0.5);
+    var epochs = 4 + Math.floor(n * 0.2);
 
     var batchSize = Math.floor(n * 0.1);
     if (batchSize < 4) {
@@ -309,7 +311,7 @@ $(document).ready(function() {
     tf.tidy(function() {
       var img = getImage();
       var prediction = currentModel.predict(img);
-      moveBall(prediction.get(0, 0), prediction.get(0, 1), 'modelBall');
+      moveBall(prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5, 'modelBall');
     });
   }
 
