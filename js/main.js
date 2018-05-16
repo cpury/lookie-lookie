@@ -191,18 +191,20 @@ $(document).ready(function() {
 
   /*********** Code for the ball position *********/
 
+  var ballSize = $('#followBall').outerWidth();
+
 	function moveFollowBallRandomly() {
     // Move the ball to a random position.
-    var x = 0.01 + Math.random() * 0.98;
-    var y = 0.01 + Math.random() * 0.98;
+    var x = 0.02 + Math.random() * 0.96;
+    var y = 0.02 + Math.random() * 0.96;
 
     moveBall(x, y, 'followBall');
 	}
 
   function moveBall(x, y, id) {
     // Given relative coordinates, moves the ball there.
-    var left = x * $(document).width() - 40;
-    var top = y * $(document).height() - 40;
+    var left = x * ($('body').width() - ballSize);
+    var top = y * ($('body').height() - ballSize);
 
     var $ball = $('#' + id);
     $ball.css('left', left + 'px');
@@ -214,10 +216,10 @@ $(document).ready(function() {
     var $ball = $('#followBall');
     var left = $ball.css('left');
     var top = $ball.css('top');
-    var x = Number(left.substr(0, left.length - 2)) + 20;
-    var y = Number(top.substr(0, top.length - 2)) + 20;
+    var x = Number(left.substr(0, left.length - 2));
+    var y = Number(top.substr(0, top.length - 2));
 
-    return [x / $(document).width(), y / $(document).height()];
+    return [x / ($('body').width() - ballSize), y / ($('body').height() - ballSize)];
   }
 
   moveBall(0.5, 0.25, 'followBall');
@@ -372,7 +374,6 @@ $(document).ready(function() {
       batchSize = 32;
     }
 
-    // TODO Change UI to signify "training in progress".
     $('#start-training').prop('disabled', true);
     $('#start-training').html('In Progress...');
 
