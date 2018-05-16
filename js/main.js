@@ -38,13 +38,14 @@ $(document).ready(function() {
     $('[data-content="' + key + '"]').html(value);
   }
 
-  function addExampleCallback(n) {
-    // Call this when example #n is added.
-    setContent('n-train', n);
-    if (n == 2) {
+  function addExampleCallback() {
+    // Call this when an example is added.
+    setContent('n-train', nTrain);
+    setContent('n-val', nVal);
+    if (nTrain == 2) {
       $('#start-training').prop('disabled', false);
     }
-    if (state == 'collecting' && n == 10) {
+    if (state == 'collecting' && nTrain + nVal == 10) {
       setContent('info',
         'Great job! Now you have a handful of examples and can let the neural network train on them.<br>'
         + 'Click the "Train" button on the right to start.'
@@ -221,9 +222,12 @@ $(document).ready(function() {
   /*********** Code for collecting a dataset *********/
 
   // The dataset:
-  var n = 0;
-  var x = null;
-  var y = null;
+  var nTrain = 0;
+  var xTrain = null;
+  var yTrain = null;
+  var nVal = 0;
+  var xVal = null;
+  var yVal = null;
   var inputWidth = $('#eyes').width();
   var inputHeight = $('#eyes').height();
 
@@ -236,28 +240,61 @@ $(document).ready(function() {
     });
   }
 
+  function shouldAddToVal() {
+    // Returns true if the next example should be added to the validation set.
+    if (nTrain == 0) {
+      return false;
+    }
+    if (nVal == 0) {
+      return true;
+    }
+    return Math.random() < 0.2;
+  }
+
   function addExample(image, target) {
     // Given an image and target coordinates, adds them to our dataset.
     target[0] = target[0] - 0.5;
     target[1] = target[1] - 0.5;
     target = tf.tidy(function() { return tf.tensor1d(target).expandDims(0); });
-    if (x == null) {
-      x = tf.keep(image);
-      y = tf.keep(target);
+    var addToVal = shouldAddToVal();
+
+    if (addToVal) {
+      if (xVal == null) {
+        xVal = tf.keep(image);
+        yVal = tf.keep(target);
+      } else {
+        var oldX = xVal;
+        xVal = tf.keep(oldX.concat(image, 0));
+
+        var oldY = yVal;
+        yVal = tf.keep(oldY.concat(target, 0));
+
+        oldX.dispose();
+        oldY.dispose();
+        target.dispose();
+      }
+
+      nVal += 1;
     } else {
-      var oldX = x;
-      x = tf.keep(oldX.concat(image, 0));
+      if (xTrain == null) {
+        xTrain = tf.keep(image);
+        yTrain = tf.keep(target);
+      } else {
+        var oldX = xTrain;
+        xTrain = tf.keep(oldX.concat(image, 0));
 
-      var oldY = y;
-      y = tf.keep(oldY.concat(target, 0));
+        var oldY = yTrain;
+        yTrain = tf.keep(oldY.concat(target, 0));
 
-      oldX.dispose();
-      oldY.dispose();
-      target.dispose();
+        oldX.dispose();
+        oldY.dispose();
+        target.dispose();
+      }
+
+      nTrain += 1;
     }
 
-    n = n + 1;
-    addExampleCallback(n);
+    addExampleCallback();
   }
 
   function captureExample() {
@@ -311,12 +348,10 @@ $(document).ready(function() {
   }
 
   function fitModel(model) {
-    var n = x.shape[0];
-
     // TODO Set params in UI?
-    var epochs = 4 + Math.floor(n * 0.2);
+    var epochs = 4 + Math.floor(nTrain * 0.2);
 
-    var batchSize = Math.floor(n * 0.1);
+    var batchSize = Math.floor(nTrain * 0.1);
     if (batchSize < 4) {
       batchSize = 4;
     } else if (batchSize > 32) {
@@ -326,15 +361,15 @@ $(document).ready(function() {
     // TODO Change UI to signify "training in progress".
     $('#start-training').prop('disabled', true);
     $('#start-training').html('In Progress...');
-    console.info('Training on', n, 'samples');
+    console.info('Training on', nTrain, 'samples');
 
     state = 'training';
 
-    model.fit(x, y, {
+    model.fit(xTrain, yTrain, {
       batchSize: batchSize,
       epochs: epochs,
       shuffle: true,
-      validationSplit: .1,
+      validationData: [xVal, yVal],
       callbacks: {
         onEpochEnd: function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
