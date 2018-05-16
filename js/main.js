@@ -17,28 +17,61 @@ function supports_webm_video() {
 
 
 $(document).ready(function() {
+  // Boilerplate code to allow async functions
+  // Adapted from https://blog.mariusschulz.com/2016/12/09/typescript-2-1-async-await-for-es3-es5
+
+  var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+      function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+      function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+      function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+      step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+  };
+
+  /*********** Code for UI *********/
+
+  var state = 'loading';
+
+  function setContent(key, value) {
+    // Set an element's content based on the data-content key.
+    $('[data-content="' + key + '"]').html(value);
+  }
+
+  function addExampleCallback(n) {
+    // Call this when example #n is added.
+    setContent('n-train', n);
+    if (n == 2) {
+      $('#start-training').prop('disabled', false);
+    }
+    if (state == 'collecting' && n == 10) {
+      setContent('info',
+        'Great job! Now you have a handful of examples and can let the neural network train on them.<br>'
+        + 'Click the "Train" button on the right to start.'
+      );
+    }
+  }
+
+  function trainingFinishedCallback() {
+    // Call this when training is finished.
+    $('#modelBall').css('opacity', '0.9');
+    state = 'trained';
+    setContent('info',
+      'Awesome! The green ball should start following your eyes around.<br>'
+      + 'It will be very bad at first, but you can collect more data and retrain again later!'
+    );
+  }
+
+
+
+	/*********** Setup of video/webcam and checking for webGL support *********/
+
   var vid = document.getElementById('video');
 	var vid_width = vid.width;
 	var vid_height = vid.height;
 	var overlay = document.getElementById('overlay');
 	var overlayCC = overlay.getContext('2d');
   var currentPosition = null;
-
-	/*********** Setup of video/webcam and checking for webGL support *********/
-
-	var insertAltVideo = function(video) {
-		// insert alternate video if getUserMedia not available
-		if (supports_video()) {
-			if (supports_webm_video()) {
-				video.src = "./media/cap12_edit.webm";
-			} else if (supports_h264_baseline_video()) {
-				video.src = "./media/cap12_edit.mp4";
-			} else {
-				return false;
-			}
-			return true;
-		} else return false;
-	}
 
 	function adjustVideoProportions() {
 		// resize overlay and video if proportions of video are not 4:3
@@ -50,6 +83,9 @@ $(document).ready(function() {
 	}
 
 	function gumSuccess( stream ) {
+    state = 'collecting';
+    setContent('info', 'Alright, follow the red ball with your eyes and hit the space key whenever you are focused on it.');
+    $('#followBall').css('opacity', '0.9');
 		// add camera stream if getUserMedia succeeded
 		if ("srcObject" in vid) {
 			vid.srcObject = stream;
@@ -71,11 +107,7 @@ $(document).ready(function() {
 	}
 
 	function gumFail() {
-		// fall back to video if getUserMedia failed
-		insertAltVideo(vid);
-		document.getElementById('gum').className = "hide";
-		document.getElementById('nogum').className = "nohide";
-		alert("There was some problem trying to fetch video from your webcam, using a fallback video instead.");
+    setContent('info', 'There was some problem trying to fetch video from your webcam');
 	}
 
 	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -87,13 +119,11 @@ $(document).ready(function() {
 	} else if (navigator.getUserMedia) {
 		navigator.getUserMedia({video : true}, gumSuccess, gumFail);
 	} else {
-		insertAltVideo(vid);
-		document.getElementById('gum').className = "hide";
-		document.getElementById('nogum').className = "nohide";
-		alert("Your browser does not seem to support getUserMedia, using a fallback video instead.");
+		setContent('info', 'Your browser does not seem to support getUserMedia. This will probably only work in Chrome or Firefox.');
 	}
 
 	vid.addEventListener('canplay', startVideo, false);
+
 
 	/*********** Code for face tracking *********/
 
@@ -185,12 +215,13 @@ $(document).ready(function() {
     return [x / $(document).width(), y / $(document).height()];
   }
 
-  moveFollowBallRandomly();
+  moveBall(0.5, 0.25, 'followBall');
 
 
   /*********** Code for collecting a dataset *********/
 
   // The dataset:
+  var n = 0;
   var x = null;
   var y = null;
   var inputWidth = $('#eyes').width();
@@ -224,6 +255,9 @@ $(document).ready(function() {
       oldY.dispose();
       target.dispose();
     }
+
+    n = n + 1;
+    addExampleCallback(n);
   }
 
   function captureExample() {
@@ -240,6 +274,7 @@ $(document).ready(function() {
   /*********** Code for training a model *********/
 
   var currentModel = null;
+  var epochsTrained = 0;
 
   function createModel() {
     var model = tf.sequential({
@@ -278,6 +313,7 @@ $(document).ready(function() {
   function fitModel(model) {
     var n = x.shape[0];
 
+    // TODO Set params in UI?
     var epochs = 4 + Math.floor(n * 0.2);
 
     var batchSize = Math.floor(n * 0.1);
@@ -286,7 +322,13 @@ $(document).ready(function() {
     } else if (batchSize > 32) {
       batchSize = 32;
     }
+
+    // TODO Change UI to signify "training in progress".
+    $('#start-training').prop('disabled', true);
+    $('#start-training').html('In Progress...');
     console.info('Training on', n, 'samples');
+
+    state = 'training';
 
     model.fit(x, y, {
       batchSize: batchSize,
@@ -296,9 +338,21 @@ $(document).ready(function() {
       callbacks: {
         onEpochEnd: function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
+          epochsTrained += 1;
+          setContent('n-epochs', epochsTrained);
+          setContent('train-loss', logs.loss.toFixed(5));
+          setContent('val-loss', logs.val_loss.toFixed(5));
+
+          // Confusing code to make the UI update asyncronously:
+          return __awaiter(this, void 0, void 0, function* () {
+            yield tf.nextFrame();
+          });
         },
         onTrainEnd: function() {
           console.info('Finished training:', model);
+          $('#start-training').prop('disabled', false);
+          $('#start-training').html('Start Training');
+          trainingFinishedCallback();
         },
       }
     });
@@ -316,6 +370,7 @@ $(document).ready(function() {
   }
 
   setInterval(moveModelBall, 100);
+  moveBall(0.5, 0.5, 'modelBall');
 
 
 
@@ -323,20 +378,19 @@ $(document).ready(function() {
 
   $('body').keyup(function(e) {
     // On space key:
-    if (e.keyCode == 32) {
+    if (e.keyCode == 32 && (state == 'collecting' || state == 'trained')) {
       captureExample();
       setTimeout(moveFollowBallRandomly, 100);
 
       e.preventDefault();
       return false;
     }
+  });
 
-    // On enter key:
-    if (e.keyCode == 13) {
-      if (currentModel == null) {
-        currentModel = createModel();
-      }
-      fitModel(currentModel);
+  $('#start-training').click(function(e) {
+    if (currentModel == null) {
+      currentModel = createModel();
     }
+    fitModel(currentModel);
   });
 });
