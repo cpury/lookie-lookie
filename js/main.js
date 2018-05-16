@@ -323,18 +323,18 @@ $(document).ready(function() {
         tf.layers.conv2d({
           inputShape: [inputHeight, inputWidth, 3],
           kernelSize: 5,
-          filters: 16,
+          filters: 8,
           strides: 1,
           activation: 'relu',
           kernelInitializer: 'varianceScaling',
         }),
         tf.layers.maxPooling2d({
-          poolSize: [4, 4],
-          strides: [4, 4],
+          poolSize: [2, 2],
+          strides: [2, 2],
         }),
         tf.layers.flatten(),
         tf.layers.dropout({
-          rate: 0.3,
+          rate: 0.5,
         }),
         tf.layers.dense({
           units: 2,
@@ -344,7 +344,7 @@ $(document).ready(function() {
       ]
     });
 
-    optimizer = tf.train.adam(0.004);
+    optimizer = tf.train.adam(0.001);
 
     model.compile({optimizer: optimizer, loss: 'meanSquaredError'});
 
