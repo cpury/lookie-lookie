@@ -309,6 +309,13 @@ $(document).ready(function() {
       var ballPos = getFollowBallPos();
       addExample(img, ballPos);
     });
+    // Add flipped image as well:
+    tf.tidy(function() {
+      var img = getImage().reverse(1);
+      var ballPos = getFollowBallPos();
+      ballPos[0] = 1 - ballPos[0];
+      addExample(img, ballPos);
+    });
   }
 
 
