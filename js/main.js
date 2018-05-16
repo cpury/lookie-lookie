@@ -353,12 +353,15 @@ $(document).ready(function() {
 
     optimizer = tf.train.adam(0.001);
 
-    model.compile({optimizer: optimizer, loss: 'meanSquaredError'});
+    model.compile({
+      optimizer: optimizer,
+      loss: 'meanSquaredError',
+    });
 
     return model;
   }
 
-  function fitModel(model) {
+  function fitModel() {
     // TODO Set params in UI?
     var epochs = 4 + Math.floor(nTrain * 0.2);
 
@@ -372,11 +375,16 @@ $(document).ready(function() {
     // TODO Change UI to signify "training in progress".
     $('#start-training').prop('disabled', true);
     $('#start-training').html('In Progress...');
+
+    if (currentModel == null) {
+      currentModel = createModel();
+    }
+
     console.info('Training on', nTrain, 'samples');
 
     state = 'training';
 
-    model.fit(xTrain, yTrain, {
+    currentModel.fit(xTrain, yTrain, {
       batchSize: batchSize,
       epochs: epochs,
       shuffle: true,
@@ -395,7 +403,7 @@ $(document).ready(function() {
           });
         },
         onTrainEnd: function() {
-          console.info('Finished training:', model);
+          console.info('Finished training:', currentModel);
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');
           trainingFinishedCallback();
@@ -434,9 +442,6 @@ $(document).ready(function() {
   });
 
   $('#start-training').click(function(e) {
-    if (currentModel == null) {
-      currentModel = createModel();
-    }
-    fitModel(currentModel);
+    fitModel();
   });
 });
