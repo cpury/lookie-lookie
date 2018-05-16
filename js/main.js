@@ -335,10 +335,10 @@ $(document).ready(function() {
           activation: 'relu',
           kernelInitializer: 'varianceScaling',
         }),
-        tf.layers.maxPooling2d({
-          poolSize: [2, 2],
-          strides: [2, 2],
-        }),
+        // tf.layers.maxPooling2d({
+        //   poolSize: [2, 2],
+        //   strides: [2, 2],
+        // }),
         tf.layers.flatten(),
         tf.layers.dropout({
           rate: 0.5,
