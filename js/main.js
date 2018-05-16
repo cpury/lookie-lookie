@@ -84,8 +84,8 @@ $(document).ready(function() {
 	}
 
 	function gumSuccess( stream ) {
-    state = 'collecting';
-    setContent('info', 'Alright, follow the red ball with your eyes and hit the space key whenever you are focused on it.');
+    state = 'finding face';
+    setContent('info', 'Thanks! Now let\'s find your face!');
     $('#followBall').css('opacity', '0.9');
 		// add camera stream if getUserMedia succeeded
 		if ("srcObject" in vid) {
@@ -150,6 +150,10 @@ $(document).ready(function() {
     if (currentPosition) {
       trackFace(currentPosition);
       ctrack.draw(overlay);
+      if (state == 'finding face') {
+        state = 'collecting';
+        setContent('info', 'Alright, follow the red ball with your eyes and hit the space key whenever you are focused on it.');
+      }
     }
 	}
 
