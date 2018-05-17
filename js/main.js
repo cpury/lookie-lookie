@@ -40,12 +40,12 @@ $(document).ready(function() {
 
   function addExampleCallback() {
     // Call this when an example is added.
-    setContent('n-train', nTrain);
-    setContent('n-val', nVal);
-    if (nTrain == 2) {
+    setContent('n-train', dataset.train.n);
+    setContent('n-val', dataset.val.n);
+    if (dataset.train.n == 2) {
       $('#start-training').prop('disabled', false);
     }
-    if (state == 'collecting' && nTrain + nVal == 14) {
+    if (state == 'collecting' && dataset.train.n + dataset.val.n == 14) {
       setContent('info',
         'Great job! Now that you have a handful of examples, let\'s train the neural network!<br>'
         + 'Click the "Start Training" button on the right to start.'
@@ -228,14 +228,20 @@ $(document).ready(function() {
   /*********** Code for collecting a dataset *********/
 
   // The dataset:
-  var nTrain = 0;
-  var xTrain = null;
-  var yTrain = null;
-  var nVal = 0;
-  var xVal = null;
-  var yVal = null;
-  var inputWidth = $('#eyes').width();
-  var inputHeight = $('#eyes').height();
+  var dataset = {
+    inputWidth: $('#eyes').width(),
+    inputHeight: $('#eyes').height(),
+    train: {
+      n: 0,
+      x: null,
+      y: null,
+    },
+    val: {
+      n: 0,
+      x: null,
+      y: null,
+    }
+  };
 
   function getImage() {
     // Capture the current image in the eyes canvas as a tensor.
@@ -248,10 +254,10 @@ $(document).ready(function() {
 
   function shouldAddToVal() {
     // Returns true if the next example should be added to the validation set.
-    if (nTrain == 0) {
+    if (dataset.train.n == 0) {
       return false;
     }
-    if (nVal == 0) {
+    if (dataset.val.n == 0) {
       return true;
     }
     return Math.random() < 0.2;
@@ -265,39 +271,39 @@ $(document).ready(function() {
     var addToVal = shouldAddToVal();
 
     if (addToVal) {
-      if (xVal == null) {
-        xVal = tf.keep(image);
-        yVal = tf.keep(target);
+      if (dataset.val.x == null) {
+        dataset.val.x = tf.keep(image);
+        dataset.val.y = tf.keep(target);
       } else {
-        var oldX = xVal;
-        xVal = tf.keep(oldX.concat(image, 0));
+        var oldX = dataset.val.x;
+        dataset.val.x = tf.keep(oldX.concat(image, 0));
 
-        var oldY = yVal;
-        yVal = tf.keep(oldY.concat(target, 0));
+        var oldY = dataset.val.y;
+        dataset.val.y = tf.keep(oldY.concat(target, 0));
 
         oldX.dispose();
         oldY.dispose();
         target.dispose();
       }
 
-      nVal += 1;
+      dataset.val.n += 1;
     } else {
-      if (xTrain == null) {
-        xTrain = tf.keep(image);
-        yTrain = tf.keep(target);
+      if (dataset.train.x == null) {
+        dataset.train.x = tf.keep(image);
+        dataset.train.y = tf.keep(target);
       } else {
-        var oldX = xTrain;
-        xTrain = tf.keep(oldX.concat(image, 0));
+        var oldX = dataset.train.x;
+        dataset.train.x = tf.keep(oldX.concat(image, 0));
 
-        var oldY = yTrain;
-        yTrain = tf.keep(oldY.concat(target, 0));
+        var oldY = dataset.train.y;
+        dataset.train.y = tf.keep(oldY.concat(target, 0));
 
         oldX.dispose();
         oldY.dispose();
         target.dispose();
       }
 
-      nTrain += 1;
+      dataset.train.n += 1;
     }
 
     addExampleCallback();
@@ -330,7 +336,7 @@ $(document).ready(function() {
     var model = tf.sequential({
       layers: [
         tf.layers.conv2d({
-          inputShape: [inputHeight, inputWidth, 3],
+          inputShape: [dataset.inputHeight, dataset.inputWidth, 3],
           kernelSize: 5,
           filters: 8,
           strides: 1,
@@ -365,13 +371,13 @@ $(document).ready(function() {
 
   function fitModel() {
     // TODO Set params in UI?
-    var epochs = 2 + Math.floor(nTrain * 0.1);
+    var epochs = 2 + Math.floor(dataset.train.n * 0.1);
 
     if (epochsTrained == 0) {
       epochs *= 2;
     }
 
-    var batchSize = Math.floor(nTrain * 0.1);
+    var batchSize = Math.floor(dataset.train.n * 0.1);
     if (batchSize < 4) {
       batchSize = 4;
     } else if (batchSize > 32) {
@@ -385,15 +391,15 @@ $(document).ready(function() {
       currentModel = createModel();
     }
 
-    console.info('Training on', nTrain, 'samples');
+    console.info('Training on', dataset.train.n, 'samples');
 
     state = 'training';
 
-    currentModel.fit(xTrain, yTrain, {
+    currentModel.fit(dataset.train.x, dataset.train.y, {
       batchSize: batchSize,
       epochs: epochs,
       shuffle: true,
-      validationData: [xVal, yVal],
+      validationData: [dataset.val.x, dataset.val.y],
       callbacks: {
         onEpochEnd: function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
