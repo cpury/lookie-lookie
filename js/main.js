@@ -56,6 +56,7 @@ $(document).ready(function() {
   function trainingFinishedCallback() {
     // Call this when training is finished.
     $('#modelBall').css('opacity', '0.9');
+    $('#draw-heatmap').prop('disabled', false);
     state = 'trained';
     setContent('info',
       'Awesome! The green ball should start following your eyes around.<br>'
@@ -131,6 +132,7 @@ $(document).ready(function() {
 	var ctrack = new clm.tracker();
 	ctrack.init();
 	var trackingStarted = false;
+  var currentEyeRect = null;
 
 	function startVideo() {
 		// start video
@@ -173,6 +175,7 @@ $(document).ready(function() {
   function trackFace(position) {
     // Given a tracked face, crops out the eyes and draws them in the eyes canvas.
     var rect = getEyesRect(position);
+    currentEyeRect = rect;
 
     var $video = $('#video');
     var tempCanvas = document.getElementById('temp');
@@ -252,59 +255,71 @@ $(document).ready(function() {
     });
   }
 
-  function shouldAddToVal() {
-    // Returns true if the next example should be added to the validation set.
-    if (dataset.train.n == 0) {
-      return false;
+  function getEyePos(mirror) {
+    // Get middel x, y of the eye rectangle, relative to video size, as a tensor.
+    var x = (currentEyeRect[0] + currentEyeRect[2]) / 2;
+    var y = (currentEyeRect[1] + currentEyeRect[3] / 2);
+    var maxX = $('#temp').width();
+    var maxY = $('#temp').height();
+
+    x = (x / maxX) * 2 - 1;
+    y = (y / maxY) * 2 - 1;
+
+    if (mirror) {
+      x = 1 - x;
+      y = 1 - y;
     }
-    if (dataset.val.n == 0) {
-      return true;
-    }
-    return Math.random() < 0.2;
+    return tf.tidy(function() { return tf.tensor1d([x, y]).expandDims(0); });
   }
 
-  function addExample(image, target) {
-    // Given an image and target coordinates, adds them to our dataset.
+  function whichDataset() {
+    // Returns 'train' or 'val' depending on what makes sense / is random.
+    if (dataset.train.n == 0) {
+      return 'train';
+    }
+    if (dataset.val.n == 0) {
+      return 'val';
+    }
+    return Math.random() < 0.2 ? 'val' : 'train';
+  }
+
+  function addToDataset(image, eyePos, target, key) {
+    // Add the given x, y to either 'train' or 'val'.
+    var set = dataset[key];
+
+    if (set.x == null) {
+      set.x = [
+        tf.keep(image),
+        tf.keep(eyePos),
+      ];
+      set.y = tf.keep(target);
+    } else {
+      var oldImage = set.x[0];
+      set.x[0] = tf.keep(oldImage.concat(image, 0));
+
+      var oldEyePos = set.x[1];
+      set.x[1] = tf.keep(oldEyePos.concat(eyePos, 0));
+
+      var oldY = set.y;
+      set.y = tf.keep(oldY.concat(target, 0));
+
+      oldImage.dispose();
+      oldEyePos.dispose();
+      oldY.dispose();
+      target.dispose();
+    }
+
+    set.n += 1;
+  }
+
+  function addExample(image, eyePos, target) {
+    // Given an image, eye pos and target coordinates, adds them to our dataset.
     target[0] = target[0] - 0.5;
     target[1] = target[1] - 0.5;
     target = tf.tidy(function() { return tf.tensor1d(target).expandDims(0); });
-    var addToVal = shouldAddToVal();
+    var key = whichDataset();
 
-    if (addToVal) {
-      if (dataset.val.x == null) {
-        dataset.val.x = tf.keep(image);
-        dataset.val.y = tf.keep(target);
-      } else {
-        var oldX = dataset.val.x;
-        dataset.val.x = tf.keep(oldX.concat(image, 0));
-
-        var oldY = dataset.val.y;
-        dataset.val.y = tf.keep(oldY.concat(target, 0));
-
-        oldX.dispose();
-        oldY.dispose();
-        target.dispose();
-      }
-
-      dataset.val.n += 1;
-    } else {
-      if (dataset.train.x == null) {
-        dataset.train.x = tf.keep(image);
-        dataset.train.y = tf.keep(target);
-      } else {
-        var oldX = dataset.train.x;
-        dataset.train.x = tf.keep(oldX.concat(image, 0));
-
-        var oldY = dataset.train.y;
-        dataset.train.y = tf.keep(oldY.concat(target, 0));
-
-        oldX.dispose();
-        oldY.dispose();
-        target.dispose();
-      }
-
-      dataset.train.n += 1;
-    }
+    addToDataset(image, eyePos, target, key);
 
     addExampleCallback();
   }
@@ -315,14 +330,16 @@ $(document).ready(function() {
     tf.tidy(function() {
       var img = getImage();
       var ballPos = getFollowBallPos();
-      addExample(img, ballPos);
+      var eyePos = getEyePos();
+      addExample(img, eyePos, ballPos);
     });
     // Add flipped image as well:
     tf.tidy(function() {
       var img = getImage().reverse(1);
       var ballPos = getFollowBallPos();
+      var eyePos = getEyePos(true);
       ballPos[0] = 1 - ballPos[0];
-      addExample(img, ballPos);
+      addExample(img, eyePos, ballPos);
     });
   }
 
@@ -333,6 +350,47 @@ $(document).ready(function() {
   var epochsTrained = 0;
 
   function createModel() {
+    var input_image = tf.input({
+      name: 'image',
+      shape: [dataset.inputHeight, dataset.inputWidth, 3],
+    });
+    var input_pos = tf.input({
+      name: 'eyePos',
+      shape: [2],
+    });
+
+    var conv = tf.layers.conv2d({
+      kernelSize: 5,
+      filters: 8,
+      strides: 1,
+      activation: 'relu',
+      kernelInitializer: 'varianceScaling',
+    }).apply(input_image);
+    var flat = tf.layers.flatten().apply(conv);
+    var dropout = tf.layers.dropout({
+      rate: 0.5,
+    }).apply(flat);
+
+    var concat = tf.layers.concatenate().apply([dropout, input_pos]);
+    var output = tf.layers.dense({
+      units: 2,
+      activation: 'tanh',
+      kernelInitializer: 'varianceScaling',
+    }).apply(concat);
+
+    var model = tf.model({inputs: [input_image, input_pos], outputs: output});
+
+    optimizer = tf.train.adam(0.001);
+
+    model.compile({
+      optimizer: optimizer,
+      loss: 'meanSquaredError',
+    });
+
+    return model;
+  }
+
+  function createModel_old() {
     var model = tf.sequential({
       layers: [
         tf.layers.conv2d({
@@ -429,13 +487,71 @@ $(document).ready(function() {
     }
     tf.tidy(function() {
       var img = getImage();
-      var prediction = currentModel.predict(img);
+      var eyePos = getEyePos();
+      var prediction = currentModel.predict([img, eyePos]);
       moveBall(prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5, 'modelBall');
     });
   }
 
   setInterval(moveModelBall, 100);
   moveBall(0.5, 0.5, 'modelBall');
+
+
+  /*********** Code for drawing heatmaps *********/
+
+  function getHeatColor(value, alpha) {
+    // Adapted from https://stackoverflow.com/a/17268489/1257278
+    if (typeof alpha == 'undefined') {
+      alpha = 1.0;
+    }
+    var hue = ((1 - value) * 120).toString(10);
+    return 'hsla(' + hue + ',100%,50%,' + alpha + ')';
+  };
+
+  function fillHeatmap(data, ctx, width, height, radius) {
+    // Go through a dataset and fill the context with the corresponding circles.
+    var predictions = currentModel.predict(data.x);
+
+    for (var i = 0; i < data.n; i++) {
+      var input = data.x[i];
+      var trueX = data.y.get(i, 0);
+      var trueY = data.y.get(i, 1);
+      var predX = predictions.get(i, 0);
+      var predY = predictions.get(i, 1);
+      var errorX = Math.pow(predX - trueX, 2);
+      var errorY = Math.pow(predY - trueY, 2);
+      var error = Math.min(Math.sqrt(Math.sqrt(errorX + errorY)), 1);
+
+      var pointX = Math.floor((trueX + 0.5) * width);
+      var pointY = Math.floor((trueY + 0.5) * height);
+
+      ctx.beginPath();
+      ctx.fillStyle = getHeatColor(error, 0.5);
+      ctx.arc(pointX, pointY, radius, 0, 2 * Math.PI);
+      ctx.fill()
+    }
+  }
+
+  function drawHeatmap() {
+    $('#draw-heatmap').prop('disabled', true);
+    $('#draw-heatmap').html('In Progress...');
+
+    var heatmap = $('#heatMap')[0];
+    var ctx = heatmap.getContext('2d');
+
+    var width = $('body').width();
+    var height = $('body').height();
+
+    heatmap.width = width;
+    heatmap.height = height;
+    ctx.clearRect(0, 0, width, height);
+
+    fillHeatmap(dataset.val, ctx, width, height, 30);
+    fillHeatmap(dataset.train, ctx, width, height, 15);
+
+    $('#draw-heatmap').prop('disabled', false);
+    $('#draw-heatmap').html('Draw Heatmap');
+  }
 
 
 
@@ -454,5 +570,9 @@ $(document).ready(function() {
 
   $('#start-training').click(function(e) {
     fitModel();
+  });
+
+  $('#draw-heatmap').click(function(e) {
+    drawHeatmap();
   });
 });

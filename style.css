@@ -76,10 +76,26 @@ body, html {
 
 .buttonwrap {
   text-align: center;
-  padding: 2em;
 }
 
-#start-training {
+button {
+  position: relative;
+  z-index: 11;
+  cursor: pointer;
   font-size: 20pt;
-  padding: 0.5em 1em;
+  padding: 0.25em 0.5em;
+  margin: 0.25em;
+}
+
+.buttonwrap button {
+  width: 60;
+}
+
+#heatMap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 10;
 }
