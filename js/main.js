@@ -361,7 +361,7 @@ $(document).ready(function() {
 
     var conv = tf.layers.conv2d({
       kernelSize: 5,
-      filters: 8,
+      filters: 12,
       strides: 1,
       activation: 'relu',
       kernelInitializer: 'varianceScaling',
@@ -380,44 +380,7 @@ $(document).ready(function() {
 
     var model = tf.model({inputs: [input_image, input_pos], outputs: output});
 
-    optimizer = tf.train.adam(0.001);
-
-    model.compile({
-      optimizer: optimizer,
-      loss: 'meanSquaredError',
-    });
-
-    return model;
-  }
-
-  function createModel_old() {
-    var model = tf.sequential({
-      layers: [
-        tf.layers.conv2d({
-          inputShape: [dataset.inputHeight, dataset.inputWidth, 3],
-          kernelSize: 5,
-          filters: 8,
-          strides: 1,
-          activation: 'relu',
-          kernelInitializer: 'varianceScaling',
-        }),
-        // tf.layers.maxPooling2d({
-        //   poolSize: [2, 2],
-        //   strides: [2, 2],
-        // }),
-        tf.layers.flatten(),
-        tf.layers.dropout({
-          rate: 0.5,
-        }),
-        tf.layers.dense({
-          units: 2,
-          activation: 'tanh',
-          kernelInitializer: 'varianceScaling',
-        }),
-      ],
-    });
-
-    optimizer = tf.train.adam(0.001);
+    optimizer = tf.train.adam(0.005);
 
     model.compile({
       optimizer: optimizer,
@@ -429,7 +392,7 @@ $(document).ready(function() {
 
   function fitModel() {
     // TODO Set params in UI?
-    var epochs = 2 + Math.floor(dataset.train.n * 0.1);
+    var epochs = 4 + Math.floor(dataset.train.n * 0.2);
 
     if (epochsTrained == 0) {
       epochs *= 2;
@@ -438,8 +401,8 @@ $(document).ready(function() {
     var batchSize = Math.floor(dataset.train.n * 0.1);
     if (batchSize < 4) {
       batchSize = 4;
-    } else if (batchSize > 32) {
-      batchSize = 32;
+    } else if (batchSize > 64) {
+      batchSize = 64;
     }
 
     $('#start-training').prop('disabled', true);
