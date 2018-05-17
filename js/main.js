@@ -45,10 +45,10 @@ $(document).ready(function() {
     if (nTrain == 2) {
       $('#start-training').prop('disabled', false);
     }
-    if (state == 'collecting' && nTrain + nVal == 10) {
+    if (state == 'collecting' && nTrain + nVal == 14) {
       setContent('info',
-        'Great job! Now you have a handful of examples and can let the neural network train on them.<br>'
-        + 'Click the "Train" button on the right to start.'
+        'Great job! Now that you have a handful of examples, let\'s train the neural network!<br>'
+        + 'Click the "Start Training" button on the right to start.'
       );
     }
   }
@@ -350,7 +350,7 @@ $(document).ready(function() {
           activation: 'tanh',
           kernelInitializer: 'varianceScaling',
         }),
-      ]
+      ],
     });
 
     optimizer = tf.train.adam(0.001);
@@ -365,7 +365,11 @@ $(document).ready(function() {
 
   function fitModel() {
     // TODO Set params in UI?
-    var epochs = 4 + Math.floor(nTrain * 0.2);
+    var epochs = 2 + Math.floor(nTrain * 0.1);
+
+    if (epochsTrained == 0) {
+      epochs *= 2;
+    }
 
     var batchSize = Math.floor(nTrain * 0.1);
     if (batchSize < 4) {
