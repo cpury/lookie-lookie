@@ -360,19 +360,27 @@ $(document).ready(function() {
       shape: [2],
     });
 
+    var dropout_input = tf.layers.dropout({
+      rate: 0.1,
+    }).apply(input_image);
     var conv = tf.layers.conv2d({
       kernelSize: 5,
       filters: 12,
       strides: 1,
       activation: 'relu',
       kernelInitializer: 'varianceScaling',
-    }).apply(input_image);
-    var flat = tf.layers.flatten().apply(conv);
-    var dropout = tf.layers.dropout({
-      rate: 0.5,
+    }).apply(dropout_input);
+    var maxpool = tf.layers.maxPooling2d({
+      poolSize: [2, 2],
+      strides: [2, 2],
+    }).apply(conv);
+    var flat = tf.layers.flatten().apply(maxpool);
+    var dropout_conv = tf.layers.dropout({
+      rate: 0.1,
     }).apply(flat);
 
-    var concat = tf.layers.concatenate().apply([dropout, input_pos]);
+    var concat = tf.layers.concatenate().apply([dropout_conv, input_pos]);
+
     var output = tf.layers.dense({
       units: 2,
       activation: 'tanh',
@@ -381,7 +389,7 @@ $(document).ready(function() {
 
     var model = tf.model({inputs: [input_image, input_pos], outputs: output});
 
-    optimizer = tf.train.adam(0.005);
+    optimizer = tf.train.adam(0.001);
 
     model.compile({
       optimizer: optimizer,
