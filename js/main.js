@@ -57,6 +57,7 @@ $(document).ready(function() {
     // Call this when training is finished.
     $('#modelBall').css('opacity', '0.9');
     $('#draw-heatmap').prop('disabled', false);
+    $('#reset-model').prop('disabled', false);
     state = 'trained';
     setContent('info',
       'Awesome! The green ball should start following your eyes around.<br>'
@@ -186,7 +187,7 @@ $(document).ready(function() {
     tempCtx.drawImage(video, 0, 0, video.width, video.height);
 
     tempCtx.strokeStyle = 'green';
-    tempCtx.strokeRect( rect[0], rect[1], rect[2], rect[3] );
+    tempCtx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
 
     eyesCtx.drawImage(tempCanvas, rect[0], rect[1], rect[2], rect[3], 0, 0, eyesCanvas.width, eyesCanvas.height);
   }
@@ -444,6 +445,16 @@ $(document).ready(function() {
     });
   }
 
+  function resetModel() {
+    $('#reset-model').prop('disabled', true);
+    currentModel = null;
+    epochsTrained = 0;
+    setContent('n-epochs', epochsTrained);
+    setContent('train-loss', '?');
+    setContent('val-loss', '?');
+    $('#reset-model').prop('disabled', false);
+  }
+
   function moveModelBall() {
     if (currentModel == null) {
       return;
@@ -512,8 +523,22 @@ $(document).ready(function() {
     fillHeatmap(dataset.val, ctx, width, height, 30);
     fillHeatmap(dataset.train, ctx, width, height, 15);
 
+    $('#clear-heatmap').prop('disabled', false);
     $('#draw-heatmap').prop('disabled', false);
     $('#draw-heatmap').html('Draw Heatmap');
+  }
+
+  function clearHeatmap() {
+    $('#clear-heatmap').prop('disabled', true);
+
+    var heatmap = $('#heatMap')[0];
+    var ctx = heatmap.getContext('2d');
+
+    var width = $('body').width();
+    var height = $('body').height();
+
+    ctx.clearRect(0, 0, heatmap.width, heatmap.height);
+    $('#clear-heatmap').prop('disabled', false);
   }
 
 
@@ -535,7 +560,15 @@ $(document).ready(function() {
     fitModel();
   });
 
+  $('#reset-model').click(function(e) {
+    resetModel();
+  });
+
   $('#draw-heatmap').click(function(e) {
     drawHeatmap();
+  });
+
+  $('#clear-heatmap').click(function(e) {
+    clearHeatmap();
   });
 });

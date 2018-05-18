@@ -82,13 +82,10 @@ button {
   position: relative;
   z-index: 11;
   cursor: pointer;
-  font-size: 20pt;
-  padding: 0.25em 0.5em;
+  font-size: 16pt;
+  padding: 0.125em 0.25em;
   margin: 0.25em;
-}
-
-.buttonwrap button {
-  width: 60;
+  width: 160px;
 }
 
 #heatMap {
