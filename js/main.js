@@ -1,130 +1,4 @@
 $(document).ready(function() {
-	/*********** Setup of video/webcam and checking for webGL support *********/
-
-  var vid = document.getElementById('video');
-	var vid_width = vid.width;
-	var vid_height = vid.height;
-	var overlay = document.getElementById('overlay');
-	var overlayCC = overlay.getContext('2d');
-  var currentPosition = null;
-
-	function adjustVideoProportions() {
-		// resize overlay and video if proportions of video are not 4:3
-		// keep same height, just change width
-		var proportion = vid.videoWidth/vid.videoHeight;
-		vid_width = Math.round(vid_height * proportion);
-		vid.width = vid_width;
-		overlay.width = vid_width;
-	}
-
-	function gumSuccess( stream ) {
-    state = 'finding face';
-    ui.showInfo('Thanks! Now let\'s find your face!', true);
-    $('#followBall').css('opacity', '0.9');
-		// add camera stream if getUserMedia succeeded
-		if ("srcObject" in vid) {
-			vid.srcObject = stream;
-		} else {
-			vid.src = (window.URL && window.URL.createObjectURL(stream));
-		}
-		vid.onloadedmetadata = function() {
-			adjustVideoProportions();
-			vid.play();
-		}
-		vid.onresize = function() {
-			adjustVideoProportions();
-			if (trackingStarted) {
-				ctrack.stop();
-				ctrack.reset();
-				ctrack.start(vid);
-			}
-		}
-	}
-
-	function gumFail() {
-    ui.showInfo('There was some problem trying to fetch video from your webcam', true);
-	}
-
-	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-	window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
-
-	// set up video
-	if (navigator.mediaDevices) {
-		navigator.mediaDevices.getUserMedia({video : true}).then(gumSuccess).catch(gumFail);
-	} else if (navigator.getUserMedia) {
-		navigator.getUserMedia({video : true}, gumSuccess, gumFail);
-	} else {
-		ui.showInfo('Your browser does not seem to support getUserMedia. This will probably only work in Chrome or Firefox.', true);
-	}
-
-	vid.addEventListener('canplay', startVideo, false);
-
-
-	/*********** Code for face tracking *********/
-
-	var ctrack = new clm.tracker();
-	ctrack.init();
-	var trackingStarted = false;
-  var currentEyeRect = null;
-
-	function startVideo() {
-		// start video
-		vid.play();
-		// start tracking
-		ctrack.start(vid);
-		trackingStarted = true;
-		// start loop to draw face
-		positionLoop();
-	}
-
-	function positionLoop() {
-    // Check if a face is detected, and if so, track it.
-		requestAnimationFrame(positionLoop);
-		currentPosition = ctrack.getCurrentPosition();
-    overlayCC.clearRect(0, 0, vid_width, vid_height);
-    if (currentPosition) {
-      trackFace(currentPosition);
-      ctrack.draw(overlay);
-      if (state == 'finding face') {
-        state = 'collecting';
-        ui.showInfo('Follow the red ball with your eyes and hit the space key whenever you are focused on it.', true);
-      }
-    }
-	}
-
-  function getEyesRect(position) {
-    // Given a tracked face, returns a rectangle surrounding the eyes.
-    var minX = position[19][0];
-    var maxX = position[15][0];
-    var minY = Math.min(position[20][1], position[21][1], position[17][1], position[16][1]);
-    var maxY = Math.max(position[23][1], position[26][1], position[31][1], position[28][1]);
-
-    var width = maxX - minX;
-    var height = maxY - minY;
-
-    return [minX, minY, width, height * 1.5];
-  }
-
-  function trackFace(position) {
-    // Given a tracked face, crops out the eyes and draws them in the eyes canvas.
-    var rect = getEyesRect(position);
-    currentEyeRect = rect;
-
-    var $video = $('#video');
-    var tempCanvas = document.getElementById('temp');
-    var tempCtx = tempCanvas.getContext('2d');
-    var eyesCanvas = document.getElementById('eyes');
-    var eyesCtx = eyesCanvas.getContext('2d');
-
-    tempCtx.drawImage(video, 0, 0, video.width, video.height);
-
-    tempCtx.strokeStyle = 'green';
-    tempCtx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
-
-    eyesCtx.drawImage(tempCanvas, rect[0], rect[1], rect[2], rect[3], 0, 0, eyesCanvas.width, eyesCanvas.height);
-  }
-
-
   /*********** Code for the ball position *********/
 
   var ballSize = $('#followBall').outerWidth();
@@ -355,7 +229,7 @@ $(document).ready(function() {
 
     console.info('Training on', dataset.train.n, 'samples');
 
-    state = 'training';
+    ui.state = 'training';
 
     currentModel.fit(dataset.train.x, dataset.train.y, {
       batchSize: batchSize,
@@ -487,7 +361,7 @@ $(document).ready(function() {
 
   $('body').keyup(function(e) {
     // On space key:
-    if (e.keyCode == 32 && (state == 'collecting' || state == 'trained')) {
+    if (e.keyCode == 32 && (ui.state == 'collecting' || ui.state == 'trained')) {
       captureExample();
       setTimeout(moveFollowBallRandomly, 100);
 

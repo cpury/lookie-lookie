@@ -27,4 +27,5 @@ window.awaiter = function(thisArg, _arguments, P, generator) {
   });
 };
 
-window.state = 'loading';
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
