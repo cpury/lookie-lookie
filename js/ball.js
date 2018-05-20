@@ -2,13 +2,13 @@ $(document).ready(function() {
   window.ball = {
     ballSize: $('#followBall').outerWidth(),
 
-  	moveFollowBallRandomly: function() {
+    moveFollowBallRandomly: function() {
       // Move the ball to a random position.
       var x = 0.02 + Math.random() * 0.96;
       var y = 0.02 + Math.random() * 0.96;
 
       ball.moveBall(x, y, 'followBall');
-  	},
+    },
 
     moveBall: function(x, y, id) {
       // Given relative coordinates, moves the ball there.
