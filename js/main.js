@@ -1,72 +1,4 @@
-// video support utility functions
-function supports_video() {
-  return !!document.createElement('video').canPlayType;
-}
-
-function supports_h264_baseline_video() {
-  if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
-}
-
-function supports_webm_video() {
-  if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/webm; codecs="vp8"');
-}
-
-
 $(document).ready(function() {
-  // Boilerplate code to allow async functions
-  // Adapted from https://blog.mariusschulz.com/2016/12/09/typescript-2-1-async-await-for-es3-es5
-
-  var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-      function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-      function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-      function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-      step((generator = generator.apply(thisArg, _arguments)).next());
-    });
-  };
-
-  /*********** Code for UI *********/
-
-  var state = 'loading';
-
-  function setContent(key, value) {
-    // Set an element's content based on the data-content key.
-    $('[data-content="' + key + '"]').html(value);
-  }
-
-  function addExampleCallback() {
-    // Call this when an example is added.
-    setContent('n-train', dataset.train.n);
-    setContent('n-val', dataset.val.n);
-    if (dataset.train.n == 2) {
-      $('#start-training').prop('disabled', false);
-    }
-    if (state == 'collecting' && dataset.train.n + dataset.val.n == 14) {
-      setContent('info',
-        'Great job! Now that you have a handful of examples, let\'s train the neural network!<br>'
-        + 'Click the "Start Training" button on the right to start.'
-      );
-    }
-  }
-
-  function trainingFinishedCallback() {
-    // Call this when training is finished.
-    $('#modelBall').css('opacity', '0.9');
-    $('#draw-heatmap').prop('disabled', false);
-    $('#reset-model').prop('disabled', false);
-    state = 'trained';
-    setContent('info',
-      'Awesome! The green ball should start following your eyes around.<br>'
-      + 'It will be very bad at first, but you can collect more data and retrain again later!'
-    );
-  }
-
-
-
 	/*********** Setup of video/webcam and checking for webGL support *********/
 
   var vid = document.getElementById('video');
@@ -87,7 +19,7 @@ $(document).ready(function() {
 
 	function gumSuccess( stream ) {
     state = 'finding face';
-    setContent('info', 'Thanks! Now let\'s find your face!');
+    ui.showInfo('Thanks! Now let\'s find your face!', true);
     $('#followBall').css('opacity', '0.9');
 		// add camera stream if getUserMedia succeeded
 		if ("srcObject" in vid) {
@@ -110,7 +42,7 @@ $(document).ready(function() {
 	}
 
 	function gumFail() {
-    setContent('info', 'There was some problem trying to fetch video from your webcam');
+    ui.showInfo('There was some problem trying to fetch video from your webcam', true);
 	}
 
 	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -122,7 +54,7 @@ $(document).ready(function() {
 	} else if (navigator.getUserMedia) {
 		navigator.getUserMedia({video : true}, gumSuccess, gumFail);
 	} else {
-		setContent('info', 'Your browser does not seem to support getUserMedia. This will probably only work in Chrome or Firefox.');
+		ui.showInfo('Your browser does not seem to support getUserMedia. This will probably only work in Chrome or Firefox.', true);
 	}
 
 	vid.addEventListener('canplay', startVideo, false);
@@ -155,7 +87,7 @@ $(document).ready(function() {
       ctrack.draw(overlay);
       if (state == 'finding face') {
         state = 'collecting';
-        setContent('info', 'Alright, follow the red ball with your eyes and hit the space key whenever you are focused on it.');
+        ui.showInfo('Follow the red ball with your eyes and hit the space key whenever you are focused on it.', true);
       }
     }
 	}
@@ -322,7 +254,7 @@ $(document).ready(function() {
 
     addToDataset(image, eyePos, target, key);
 
-    addExampleCallback();
+    ui.onAddExample(dataset.train.n, dataset.val.n);
   }
 
   function captureExample() {
@@ -434,12 +366,12 @@ $(document).ready(function() {
         onEpochEnd: function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
           epochsTrained += 1;
-          setContent('n-epochs', epochsTrained);
-          setContent('train-loss', logs.loss.toFixed(5));
-          setContent('val-loss', logs.val_loss.toFixed(5));
+          ui.setContent('n-epochs', epochsTrained);
+          ui.setContent('train-loss', logs.loss.toFixed(5));
+          ui.setContent('val-loss', logs.val_loss.toFixed(5));
 
           // Confusing code to make the UI update asyncronously:
-          return __awaiter(this, void 0, void 0, function* () {
+          return awaiter(this, void 0, void 0, function* () {
             yield tf.nextFrame();
           });
         },
@@ -447,7 +379,7 @@ $(document).ready(function() {
           console.info('Finished training:', currentModel);
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');
-          trainingFinishedCallback();
+          ui.onFinishTraining();
         },
       }
     });
@@ -457,9 +389,9 @@ $(document).ready(function() {
     $('#reset-model').prop('disabled', true);
     currentModel = null;
     epochsTrained = 0;
-    setContent('n-epochs', epochsTrained);
-    setContent('train-loss', '?');
-    setContent('val-loss', '?');
+    ui.setContent('n-epochs', epochsTrained);
+    ui.setContent('train-loss', '?');
+    ui.setContent('val-loss', '?');
     $('#reset-model').prop('disabled', false);
   }
 
