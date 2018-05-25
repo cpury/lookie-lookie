@@ -3,6 +3,7 @@ body, html {
   height: 100%;
   overflow: hidden;
   font-family: 'Roboto', sans-serif;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 #container, #video, #overlay {
@@ -86,6 +87,10 @@ body, html {
   animation-fill-mode: both;
 }
 
+#info h3 {
+  margin: 0.2em 0;
+}
+
 #info.flash {
   -webkit-animation-name: flash;
   animation-name: flash;
@@ -130,4 +135,5 @@ button {
   height: 100%;
   width: 100%;
   z-index: 10;
+  pointer-events: none;
 }

@@ -48,7 +48,7 @@ $(document).ready(function() {
     },
 
     gumFail: function() {
-      ui.showInfo('There was some problem trying to fetch video from your webcam', true);
+      ui.showInfo('There was some problem trying to fetch video from your webcam 😭', true);
     },
 
     startVideo: function() {
@@ -115,7 +115,7 @@ $(document).ready(function() {
   } else if (navigator.getUserMedia) {
     navigator.getUserMedia({video : true}, facetracker.gumSuccess, facetracker.gumFail);
   } else {
-    ui.showInfo('Your browser does not seem to support getUserMedia. This will probably only work in Chrome or Firefox.', true);
+    ui.showInfo('Your browser does not seem to support getUserMedia. 😭 This will probably only work in Chrome or Firefox.', true);
   }
 
   facetracker.ctrack = new clm.tracker();
