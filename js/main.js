@@ -272,7 +272,7 @@ $(document).ready(function() {
   });
 
   $('#draw-heatmap').click(function(e) {
-    heatmap.drawHeatmap(dataset);
+    heatmap.drawHeatmap(dataset, currentModel);
   });
 
   $('#clear-heatmap').click(function(e) {

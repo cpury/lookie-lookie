@@ -8,9 +8,9 @@ window.heatmap = {
     return 'hsla(' + hue + ',100%,50%,' + alpha + ')';
   },
 
-  fillHeatmap: function(data, ctx, width, height, radius) {
+  fillHeatmap: function(data, model, ctx, width, height, radius) {
     // Go through a dataset and fill the context with the corresponding circles.
-    var predictions = currentModel.predict(data.x);
+    var predictions = model.predict(data.x);
 
     for (var i = 0; i < data.n; i++) {
       var input = data.x[i];
@@ -32,7 +32,7 @@ window.heatmap = {
     }
   },
 
-  drawHeatmap: function(dataset) {
+  drawHeatmap: function(dataset, model) {
     $('#draw-heatmap').prop('disabled', true);
     $('#draw-heatmap').html('In Progress...');
 
@@ -46,8 +46,8 @@ window.heatmap = {
     heatmap.height = height;
     ctx.clearRect(0, 0, width, height);
 
-    this.fillHeatmap(dataset.val, ctx, width, height, 30);
-    this.fillHeatmap(dataset.train, ctx, width, height, 15);
+    this.fillHeatmap(dataset.val, model, ctx, width, height, 30);
+    this.fillHeatmap(dataset.train, model, ctx, width, height, 15);
 
     $('#clear-heatmap').prop('disabled', false);
     $('#draw-heatmap').prop('disabled', false);

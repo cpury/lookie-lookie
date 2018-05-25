@@ -38,7 +38,7 @@ window.ui = {
     if (nTrain == 2) {
       $('#start-training').prop('disabled', false);
     }
-    if (this.state == 'collecting' && nTrain + nVal == 14) {
+    if (this.state == 'collecting' && nTrain + nVal == 20) {
       this.showInfo(
         'Great job! Now that you have a handful of examples, let\'s train the neural network!<br>'
         + 'Click the "Start Training" button on the right to start.'
