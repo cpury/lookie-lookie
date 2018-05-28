@@ -99,13 +99,14 @@ window.dataset = {
       var eyePos = dataset.getEyePos();
       dataset.addExample(img, eyePos, ballPos);
     });
-    // Add flipped image as well:
-    tf.tidy(function() {
-      var img = dataset.getImage().reverse(1);
-      var ballPos = ball.getFollowBallPos();
-      var eyePos = dataset.getEyePos(true);
-      ballPos[0] = 1 - ballPos[0];
-      dataset.addExample(img, eyePos, ballPos);
-    });
+    // XXX Deactivated this for now since it's not helping in this setting.
+    // // Add flipped image as well:
+    // tf.tidy(function() {
+    //   var img = dataset.getImage().reverse(1);
+    //   var ballPos = ball.getFollowBallPos();
+    //   var eyePos = dataset.getEyePos(true);
+    //   ballPos[0] = 1 - ballPos[0];
+    //   dataset.addExample(img, eyePos, ballPos);
+    // });
   },
 };
