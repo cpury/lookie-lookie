@@ -24,7 +24,6 @@ window.ui = {
   onWebcamEnabled: function() {
     this.state = 'finding face';
     this.showInfo('Thanks! Now let\'s find your face! 🤨', true);
-    $('#followBall').css('opacity', '0.9');
   },
 
   onFoundFace: function() {

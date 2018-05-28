@@ -100,23 +100,12 @@ window.dataset = {
     ui.onAddExample(dataset.train.n, dataset.val.n);
   },
 
-  captureBallExample: function() {
-    // Take the latest image from the eyes canvas and add it to our dataset.
-    // Takes the coordinates of the ball.
-    tf.tidy(function() {
-      var img = dataset.getImage();
-      var ballPos = ball.getFollowBallPos();
-      var metaInfos = dataset.getMetaInfos();
-      dataset.addExample(img, metaInfos, ballPos);
-    });
-  },
-
-  captureMouseExample: function() {
+  captureExample: function() {
     // Take the latest image from the eyes canvas and add it to our dataset.
     // Takes the coordinates of the mouse.
     tf.tidy(function() {
       var img = dataset.getImage();
-      var mousePos = ball.getMousePos();
+      var mousePos = mouse.getMousePos();
       var metaInfos = dataset.getMetaInfos();
       dataset.addExample(img, metaInfos, mousePos);
     });

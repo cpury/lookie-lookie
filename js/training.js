@@ -18,7 +18,7 @@ window.training = {
     }).apply(input_image);
     var conv = tf.layers.conv2d({
       kernelSize: 5,
-      filters: 12,
+      filters: 20,
       strides: 1,
       activation: 'relu',
       kernelInitializer: 'varianceScaling',
@@ -117,4 +117,18 @@ window.training = {
     ui.setContent('val-loss', '?');
     $('#reset-model').prop('disabled', false);
   },
+
+  getPrediction: function() {
+    // Return relative x, y where we expect the user to look right now.
+    return tf.tidy(function() {
+      var img = dataset.getImage();
+      var metaInfos = dataset.getMetaInfos();
+      var prediction = training.currentModel.predict([img, metaInfos]);
+
+      var x = prediction.get(0, 0) + 0.5;
+      var y = prediction.get(0, 1) + 0.5;
+
+      return [prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5];
+    });
+  }
 };

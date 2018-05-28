@@ -1,35 +1,30 @@
 $(document).ready(function() {
+  var $ball = $('#modelBall');
+  var ballSize = $ball.outerWidth();
+
   function moveModelBall() {
     // Move the model ball to where we predict the user is looking to
     if (training.currentModel == null || training.inTraining) {
       return;
     }
-    tf.tidy(function() {
-      var img = dataset.getImage();
-      var metaInfos = dataset.getMetaInfos();
-      var prediction = training.currentModel.predict([img, metaInfos]);
-      ball.moveBall(prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5, 'modelBall');
-    });
+
+    var prediction = training.getPrediction();
+    var left = prediction[0] * ($('body').width() - ballSize);
+    var top = prediction[1] * ($('body').height() - ballSize);
+
+    $ball.css('left', left + 'px');
+    $ball.css('top', top + 'px');
   }
 
   setInterval(moveModelBall, 100);
-  ball.moveBall(0.5, 0.5, 'modelBall');
 
 
   // Map functions to keys and buttons:
 
   $('body').keyup(function(e) {
     // On space key:
-    // if (e.keyCode == 32 && ui.readyToCollect) {
-    //   dataset.captureBallExample();
-    //   setTimeout(ball.moveFollowBallRandomly, 100);
-    //
-    //   e.preventDefault();
-    //   return false;
-    // }
-    // On space key:
     if (e.keyCode == 32 && ui.readyToCollect) {
-      dataset.captureMouseExample();
+      dataset.captureExample();
 
       e.preventDefault();
       return false;
