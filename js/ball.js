@@ -1,6 +1,6 @@
 $(document).ready(function() {
   window.ball = {
-    ballSize: $('#followBall').outerWidth(),
+    ballSize: $('.ball').outerWidth(),
 
     moveFollowBallRandomly: function() {
       // Move the ball to a random position.
@@ -33,7 +33,20 @@ $(document).ready(function() {
         y / ($('body').height() - ball.ballSize)
       ];
     },
+
+    mousePosX: 0.5,
+    mousePosY: 0.5,
+
+    handleMouseMove: function(event) {
+      ball.mousePosX = event.clientX / $('body').width();
+      ball.mousePosY = event.clientY / $('body').height();
+    },
+
+    getMousePos: function() {
+      return [ball.mousePosX, ball.mousePosY];
+    },
   };
 
   ball.moveBall(0.5, 0.25, 'followBall');
+  document.onmousemove = ball.handleMouseMove;
 });

@@ -33,7 +33,7 @@ window.ui = {
       this.readyToCollect = true;
       this.showInfo(
         '<h3>Let\'s start! 🙂</h3>' +
-        'Follow the red ball with your eyes and hit the space key whenever you are focused on it 👀',
+        'Move you mouse over the screen, follow it with your eyes and hit the space key about once per second 👀',
         true
       );
     }

@@ -1,7 +1,7 @@
 $(document).ready(function() {
   function moveModelBall() {
     // Move the model ball to where we predict the user is looking to
-    if (training.currentModel == null) {
+    if (training.currentModel == null || training.inTraining) {
       return;
     }
     tf.tidy(function() {
@@ -20,9 +20,16 @@ $(document).ready(function() {
 
   $('body').keyup(function(e) {
     // On space key:
+    // if (e.keyCode == 32 && ui.readyToCollect) {
+    //   dataset.captureBallExample();
+    //   setTimeout(ball.moveFollowBallRandomly, 100);
+    //
+    //   e.preventDefault();
+    //   return false;
+    // }
+    // On space key:
     if (e.keyCode == 32 && ui.readyToCollect) {
-      dataset.captureExample();
-      setTimeout(ball.moveFollowBallRandomly, 100);
+      dataset.captureMouseExample();
 
       e.preventDefault();
       return false;

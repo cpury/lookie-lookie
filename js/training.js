@@ -1,5 +1,6 @@
 window.training = {
   currentModel: null,
+  inTraining: false,
   epochsTrained: 0,
 
   createModel: function() {
@@ -53,6 +54,7 @@ window.training = {
 
   fitModel: function() {
     // TODO Set params in UI?
+    this.inTraining = true;
     var epochs = 4 + Math.floor(dataset.train.n * 0.2);
 
     if (training.epochsTrained == 0) {
@@ -99,6 +101,7 @@ window.training = {
           console.info('Finished training:', training.currentModel);
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');
+          training.inTraining = false;
           ui.onFinishTraining();
         },
       }

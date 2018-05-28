@@ -90,7 +90,7 @@ window.dataset = {
     ui.onAddExample(dataset.train.n, dataset.val.n);
   },
 
-  captureExample: function() {
+  captureBallExample: function() {
     // Take the latest image from the eyes canvas and add it to our dataset.
     // Takes the coordinates of the ball.
     tf.tidy(function() {
@@ -99,14 +99,16 @@ window.dataset = {
       var eyePos = dataset.getEyePos();
       dataset.addExample(img, eyePos, ballPos);
     });
-    // XXX Deactivated this for now since it's not helping in this setting.
-    // // Add flipped image as well:
-    // tf.tidy(function() {
-    //   var img = dataset.getImage().reverse(1);
-    //   var ballPos = ball.getFollowBallPos();
-    //   var eyePos = dataset.getEyePos(true);
-    //   ballPos[0] = 1 - ballPos[0];
-    //   dataset.addExample(img, eyePos, ballPos);
-    // });
+  },
+
+  captureMouseExample: function() {
+    // Take the latest image from the eyes canvas and add it to our dataset.
+    // Takes the coordinates of the mouse.
+    tf.tidy(function() {
+      var img = dataset.getImage();
+      var mousePos = ball.getMousePos();
+      var eyePos = dataset.getEyePos();
+      dataset.addExample(img, eyePos, mousePos);
+    });
   },
 };
