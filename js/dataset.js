@@ -21,21 +21,31 @@ window.dataset = {
     });
   },
 
-  getEyePos: function(mirror) {
-    // Get middle x, y of the eye rectangle, relative to video size, as a tensor.
-    var x = (currentEyeRect[0] + currentEyeRect[2]) / 2;
-    var y = (currentEyeRect[1] + currentEyeRect[3] / 2);
-    var maxX = $('#temp').width();
-    var maxY = $('#temp').height();
+  getMetaInfos: function(mirror) {
+    // Get some meta info about the rectangle as a tensor:
+    // - middle x, y of the eye rectangle, relative to video size
+    // - size of eye rectangle, relative to video size
+    // - angle of rectangle (TODO)
+    var x = facetracker.currentEyeRect[0] + (facetracker.currentEyeRect[2] / 2);
+    var y = facetracker.currentEyeRect[1] + (facetracker.currentEyeRect[3] / 2);
+    var canvasWidth = $('#temp').width();
+    var canvasHeight = $('#temp').height();
 
-    x = (x / maxX) * 2 - 1;
-    y = (y / maxY) * 2 - 1;
+    x = (x / canvasWidth) * 2 - 1;
+    y = (y / canvasHeight) * 2 - 1;
+
+    var rectWidth = facetracker.currentEyeRect[2] / canvasWidth;
+    var rectHeight = facetracker.currentEyeRect[3] / canvasHeight;
 
     if (mirror) {
       x = 1 - x;
       y = 1 - y;
     }
-    return tf.tidy(function() { return tf.tensor1d([x, y]).expandDims(0); });
+    return tf.tidy(function() {
+      return tf.tensor1d([
+        x, y, rectWidth, rectHeight,
+      ]).expandDims(0);
+    });
   },
 
   whichDataset: function() {
@@ -49,14 +59,14 @@ window.dataset = {
     return Math.random() < 0.2 ? 'val' : 'train';
   },
 
-  addToDataset: function(image, eyePos, target, key) {
+  addToDataset: function(image, metaInfos, target, key) {
     // Add the given x, y to either 'train' or 'val'.
     var set = dataset[key];
 
     if (set.x == null) {
       set.x = [
         tf.keep(image),
-        tf.keep(eyePos),
+        tf.keep(metaInfos),
       ];
       set.y = tf.keep(target);
     } else {
@@ -64,7 +74,7 @@ window.dataset = {
       set.x[0] = tf.keep(oldImage.concat(image, 0));
 
       var oldEyePos = set.x[1];
-      set.x[1] = tf.keep(oldEyePos.concat(eyePos, 0));
+      set.x[1] = tf.keep(oldEyePos.concat(metaInfos, 0));
 
       var oldY = set.y;
       set.y = tf.keep(oldY.concat(target, 0));
@@ -78,14 +88,14 @@ window.dataset = {
     set.n += 1;
   },
 
-  addExample: function(image, eyePos, target) {
+  addExample: function(image, metaInfos, target) {
     // Given an image, eye pos and target coordinates, adds them to our dataset.
     target[0] = target[0] - 0.5;
     target[1] = target[1] - 0.5;
     target = tf.tidy(function() { return tf.tensor1d(target).expandDims(0); });
     var key = dataset.whichDataset();
 
-    dataset.addToDataset(image, eyePos, target, key);
+    dataset.addToDataset(image, metaInfos, target, key);
 
     ui.onAddExample(dataset.train.n, dataset.val.n);
   },
@@ -96,8 +106,8 @@ window.dataset = {
     tf.tidy(function() {
       var img = dataset.getImage();
       var ballPos = ball.getFollowBallPos();
-      var eyePos = dataset.getEyePos();
-      dataset.addExample(img, eyePos, ballPos);
+      var metaInfos = dataset.getMetaInfos();
+      dataset.addExample(img, metaInfos, ballPos);
     });
   },
 
@@ -107,8 +117,8 @@ window.dataset = {
     tf.tidy(function() {
       var img = dataset.getImage();
       var mousePos = ball.getMousePos();
-      var eyePos = dataset.getEyePos();
-      dataset.addExample(img, eyePos, mousePos);
+      var metaInfos = dataset.getMetaInfos();
+      dataset.addExample(img, metaInfos, mousePos);
     });
   },
 };

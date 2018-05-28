@@ -89,7 +89,7 @@ $(document).ready(function() {
     trackFace: function(position) {
       // Given a tracked face, crops out the eyes and draws them in the eyes canvas.
       var rect = facetracker.getEyesRect(position);
-      currentEyeRect = rect;
+      facetracker.currentEyeRect = rect;
 
       var tempCanvas = document.getElementById('temp');
       var tempCtx = tempCanvas.getContext('2d');

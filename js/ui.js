@@ -74,7 +74,7 @@ window.ui = {
         '<h3>Awesome! 😍</h3>' +
         'The green ball should start following your eyes around.<br>' +
         'I guess it\'s still very bad... 😅<br>' +
-        'So you should collect more training data and retrain again later!'
+        'Let\'s collect more training data!'
       );
     } else if (this.nTrainings == 2) {
       this.state = 'trained_twice';

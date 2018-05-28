@@ -8,9 +8,9 @@ window.training = {
       name: 'image',
       shape: [dataset.inputHeight, dataset.inputWidth, 3],
     });
-    var input_pos = tf.input({
-      name: 'eyePos',
-      shape: [2],
+    var input_meta = tf.input({
+      name: 'metaInfos',
+      shape: [4],
     });
 
     var dropout_input = tf.layers.dropout({
@@ -32,7 +32,7 @@ window.training = {
       rate: 0.1,
     }).apply(flat);
 
-    var concat = tf.layers.concatenate().apply([dropout_conv, input_pos]);
+    var concat = tf.layers.concatenate().apply([dropout_conv, input_meta]);
 
     var output = tf.layers.dense({
       units: 2,
@@ -40,7 +40,7 @@ window.training = {
       kernelInitializer: 'varianceScaling',
     }).apply(concat);
 
-    var model = tf.model({inputs: [input_image, input_pos], outputs: output});
+    var model = tf.model({inputs: [input_image, input_meta], outputs: output});
 
     optimizer = tf.train.adam(0.001);
 

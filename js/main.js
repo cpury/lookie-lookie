@@ -6,8 +6,8 @@ $(document).ready(function() {
     }
     tf.tidy(function() {
       var img = dataset.getImage();
-      var eyePos = dataset.getEyePos();
-      var prediction = training.currentModel.predict([img, eyePos]);
+      var metaInfos = dataset.getMetaInfos();
+      var prediction = training.currentModel.predict([img, metaInfos]);
       ball.moveBall(prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5, 'modelBall');
     });
   }
