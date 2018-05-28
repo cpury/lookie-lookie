@@ -6,7 +6,7 @@ body, html {
   color: rgba(0, 0, 0, 0.8);
 }
 
-#container, #video, #overlay {
+#video-container, #webcam, #overlay {
   /* width: 50%;
   height: 50%; */
   position: absolute;

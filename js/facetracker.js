@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  var vid = document.getElementById('video');
+  var vid = document.getElementById('webcam');
   var overlay = document.getElementById('overlay');
 
   window.facetracker = {
