@@ -63,7 +63,7 @@ window.ui = {
   onFinishTraining: function() {
     // Call this when training is finished.
     this.nTrainings += 1;
-    $('#modelBall').css('opacity', '0.9');
+    $('#target').css('opacity', '0.9');
     $('#draw-heatmap').prop('disabled', false);
     $('#reset-model').prop('disabled', false);
 
@@ -71,7 +71,7 @@ window.ui = {
       this.state = 'trained';
       this.showInfo(
         '<h3>Awesome! 😍</h3>' +
-        'The green ball should start following your eyes around.<br>' +
+        'The green target should start following your eyes around.<br>' +
         'I guess it\'s still very bad... 😅<br>' +
         'Let\'s collect more training data!'
       );

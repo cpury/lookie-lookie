@@ -28,9 +28,9 @@ body, html {
   left: 0;
 }
 
-.ball {
+#target {
+  background-color: lightgreen;
   position: absolute;
-  background-color: indianred;
   border-radius: 50%;
   height: 40px;
   width: 40px;
@@ -38,10 +38,6 @@ body, html {
   box-shadow: 0 0 20px 10px white;
   border: 4px solid rgba(0,0,0,0.5);
   opacity: 0;
-}
-
-#modelBall {
-  background-color: lightgreen;
 }
 
 @-webkit-keyframes flash {

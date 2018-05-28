@@ -1,22 +1,22 @@
 $(document).ready(function() {
-  var $ball = $('#modelBall');
-  var ballSize = $ball.outerWidth();
+  var $target = $('#target');
+  var targetSize = $target.outerWidth();
 
-  function moveModelBall() {
-    // Move the model ball to where we predict the user is looking to
+  function moveTarget() {
+    // Move the model target to where we predict the user is looking to
     if (training.currentModel == null || training.inTraining) {
       return;
     }
 
     var prediction = training.getPrediction();
-    var left = prediction[0] * ($('body').width() - ballSize);
-    var top = prediction[1] * ($('body').height() - ballSize);
+    var left = prediction[0] * ($('body').width() - targetSize);
+    var top = prediction[1] * ($('body').height() - targetSize);
 
-    $ball.css('left', left + 'px');
-    $ball.css('top', top + 'px');
+    $target.css('left', left + 'px');
+    $target.css('top', top + 'px');
   }
 
-  setInterval(moveModelBall, 100);
+  setInterval(moveTarget, 100);
 
 
   // Map functions to keys and buttons:
