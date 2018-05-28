@@ -40,6 +40,21 @@ body, html {
   opacity: 0;
 }
 
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  background-color: #05668d;
+  color: #ebf2fa;
+  font-size: 16pt;
+  padding: 0.5em;
+}
+
+a {
+  color: inherit;
+}
+
 @-webkit-keyframes flash {
   from,
   50%,
