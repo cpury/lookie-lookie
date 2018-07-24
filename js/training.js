@@ -122,11 +122,9 @@ window.training = {
     // Return relative x, y where we expect the user to look right now.
     return tf.tidy(function() {
       var img = dataset.getImage();
+      img = dataset.convertImage(img);
       var metaInfos = dataset.getMetaInfos();
       var prediction = training.currentModel.predict([img, metaInfos]);
-
-      var x = prediction.get(0, 0) + 0.5;
-      var y = prediction.get(0, 1) + 0.5;
 
       return [prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5];
     });
