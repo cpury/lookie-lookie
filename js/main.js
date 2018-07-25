@@ -77,4 +77,18 @@ $(document).ready(function() {
 
     reader.readAsBinaryString(file);
   });
+
+  $('#store-model').click(async function(e) {
+    await training.currentModel.save('downloads://model');
+  });
+
+  $('#load-model').click(function(e) {
+    $("#model-uploader").trigger('click');
+  });
+
+  $('#model-uploader').change(async function(e) {
+    var files = e.target.files;
+    training.currentModel = await tf.loadModel(tf.io.browserFiles([files[0], files[1]]));
+    ui.onFinishTraining();
+  });
 });

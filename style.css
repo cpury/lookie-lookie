@@ -149,6 +149,6 @@ button {
   pointer-events: none;
 }
 
-#data-uploader {
-  visibility: hidden;
+#data-uploader, #model-uploader {
+  display: none;
 }

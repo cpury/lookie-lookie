@@ -36,13 +36,6 @@ window.training = {
 
     var model = tf.model({inputs: [input_image, input_meta], outputs: output});
 
-    optimizer = tf.train.adam(0.0005);
-
-    model.compile({
-      optimizer: optimizer,
-      loss: 'meanSquaredError',
-    });
-
     return model;
   },
 
@@ -76,7 +69,12 @@ window.training = {
     var bestEpoch = -1;
     var bestTrainLoss = Number.MAX_SAFE_INTEGER;
     var bestValLoss = Number.MAX_SAFE_INTEGER;
-    var bestModelPath = 'localstorage://best-model'
+    var bestModelPath = 'localstorage://best-model';
+
+    training.currentModel.compile({
+      optimizer: tf.train.adam(0.0005),
+      loss: 'meanSquaredError',
+    });
 
     training.currentModel.fit(dataset.train.x, dataset.train.y, {
       batchSize: batchSize,
@@ -114,10 +112,6 @@ window.training = {
           ui.setContent('val-loss', bestValLoss.toFixed(5));
 
           training.currentModel = await tf.loadModel(bestModelPath);
-          training.currentModel.compile({
-            optimizer: optimizer,
-            loss: 'meanSquaredError',
-          });
 
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');

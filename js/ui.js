@@ -69,6 +69,7 @@ window.ui = {
     $('#target').css('opacity', '0.9');
     $('#draw-heatmap').prop('disabled', false);
     $('#reset-model').prop('disabled', false);
+    $('#store-model').prop('disabled', false);
 
     if (this.nTrainings == 1) {
       this.state = 'trained';
