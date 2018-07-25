@@ -152,4 +152,54 @@ window.dataset = {
       dataset.addExample(img, metaInfos, mousePos);
     });
   },
+
+  toJSON: function() {
+    return {
+      inputWidth: dataset.inputWidth,
+      inputHeight: dataset.inputHeight,
+      train: {
+        shapes: {
+          x0: dataset.train.x[0].shape,
+          x1: dataset.train.x[1].shape,
+          y: dataset.train.y.shape,
+        },
+        n: dataset.train.n,
+        x: dataset.train.x && [
+          dataset.train.x[0].dataSync(),
+          dataset.train.x[1].dataSync(),
+        ],
+        y: dataset.train.y.dataSync(),
+      },
+      val: {
+        shapes: {
+          x0: dataset.val.x[0].shape,
+          x1: dataset.val.x[1].shape,
+          y: dataset.val.y.shape,
+        },
+        n: dataset.val.n,
+        x: dataset.val.x && [
+          dataset.val.x[0].dataSync(),
+          dataset.val.x[1].dataSync(),
+        ],
+        y: dataset.val.y.dataSync(),
+      },
+    }
+  },
+
+  fromJSON: function(data) {
+    dataset.inputWidth = data.inputWidth;
+    dataset.inputHeight = data.inputHeight;
+    dataset.train.n = data.train.n;
+    dataset.train.x = data.train.x && [
+      tf.tensor(data.train.x[0], data.train.shapes.x0),
+      tf.tensor(data.train.x[1], data.train.shapes.x1),
+    ];
+    dataset.train.y = tf.tensor(data.train.y, data.train.shapes.y);
+    dataset.val.n = data.val.n;
+    dataset.val.x = data.val.x && [
+      tf.tensor(data.val.x[0], data.val.shapes.x0),
+      tf.tensor(data.val.x[1], data.val.shapes.x1),
+    ];
+    dataset.val.y = tf.tensor(data.val.y, data.val.shapes.y);
+  }
 };
