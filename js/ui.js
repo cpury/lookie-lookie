@@ -43,7 +43,7 @@ window.ui = {
     this.nExamples = nTrain + nVal;
     this.setContent('n-train', nTrain);
     this.setContent('n-val', nVal);
-    if (nTrain == 2) {
+    if (nTrain >= 2) {
       $('#start-training').prop('disabled', false);
     }
     if (this.state == 'collecting' && this.nExamples == 20) {
