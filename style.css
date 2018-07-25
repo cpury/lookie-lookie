@@ -148,3 +148,7 @@ button {
   z-index: 10;
   pointer-events: none;
 }
+
+#data-uploader {
+  visibility: hidden;
+}

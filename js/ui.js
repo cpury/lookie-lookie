@@ -58,6 +58,9 @@ window.ui = {
         'You\'ve collected lots of examples. Let\'s try training again!'
       );
     }
+    if (nTrain > 0 && nVal > 0) {
+      $('#store-data').prop('disabled', false);
+    }
   },
 
   onFinishTraining: function() {

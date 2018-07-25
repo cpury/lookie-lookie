@@ -154,6 +154,11 @@ window.dataset = {
   },
 
   toJSON: function() {
+    var tensorToArray = function(t) {
+      var typedArray = t.dataSync();
+      return Array.prototype.slice.call(typedArray);
+    };
+
     return {
       inputWidth: dataset.inputWidth,
       inputHeight: dataset.inputHeight,
@@ -165,10 +170,10 @@ window.dataset = {
         },
         n: dataset.train.n,
         x: dataset.train.x && [
-          dataset.train.x[0].dataSync(),
-          dataset.train.x[1].dataSync(),
+          tensorToArray(dataset.train.x[0]),
+          tensorToArray(dataset.train.x[1]),
         ],
-        y: dataset.train.y.dataSync(),
+        y: tensorToArray(dataset.train.y),
       },
       val: {
         shapes: {
@@ -178,10 +183,10 @@ window.dataset = {
         },
         n: dataset.val.n,
         x: dataset.val.x && [
-          dataset.val.x[0].dataSync(),
-          dataset.val.x[1].dataSync(),
+          tensorToArray(dataset.val.x[0]),
+          tensorToArray(dataset.val.x[1]),
         ],
-        y: dataset.val.y.dataSync(),
+        y: tensorToArray(dataset.val.y),
       },
     }
   },
@@ -201,5 +206,7 @@ window.dataset = {
       tf.tensor(data.val.x[1], data.val.shapes.x1),
     ];
     dataset.val.y = tf.tensor(data.val.y, data.val.shapes.y);
+
+    ui.onAddExample(dataset.train.n, dataset.val.n);
   }
 };
