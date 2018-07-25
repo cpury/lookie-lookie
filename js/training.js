@@ -73,26 +73,52 @@ window.training = {
 
     ui.state = 'training';
 
+    var bestEpoch = -1;
+    var bestTrainLoss = Number.MAX_SAFE_INTEGER;
+    var bestValLoss = Number.MAX_SAFE_INTEGER;
+    var bestModelPath = 'localstorage://best-model'
+
     training.currentModel.fit(dataset.train.x, dataset.train.y, {
       batchSize: batchSize,
       epochs: epochs,
       shuffle: true,
       validationData: [dataset.val.x, dataset.val.y],
       callbacks: {
-        onEpochEnd: function(epoch, logs) {
+        onEpochEnd: async function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
           training.epochsTrained += 1;
           ui.setContent('n-epochs', training.epochsTrained);
           ui.setContent('train-loss', logs.loss.toFixed(5));
           ui.setContent('val-loss', logs.val_loss.toFixed(5));
 
-          // Confusing code to make the UI update asyncronously:
-          return awaiter(this, void 0, void 0, function* () {
-            yield tf.nextFrame();
-          });
+          if (logs.val_loss < bestValLoss) {
+            // Save model
+            bestEpoch = epoch;
+            bestTrainLoss = logs.loss;
+            bestValLoss = logs.val_loss;
+
+            // Store best model:
+            await training.currentModel.save(bestModelPath);
+          }
+
+          return await tf.nextFrame();
         },
-        onTrainEnd: function() {
-          console.info('Finished training:', training.currentModel);
+        onTrainEnd: async function() {
+          console.info('Finished training');
+
+          // Load best model:
+          training.epochsTrained -= epochs - bestEpoch;
+          console.info('Loading best epoch:', training.epochsTrained);
+          ui.setContent('n-epochs', training.epochsTrained);
+          ui.setContent('train-loss', bestTrainLoss.toFixed(5));
+          ui.setContent('val-loss', bestValLoss.toFixed(5));
+
+          training.currentModel = await tf.loadModel(bestModelPath);
+          training.currentModel.compile({
+            optimizer: optimizer,
+            loss: 'meanSquaredError',
+          });
+
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');
           training.inTraining = false;
