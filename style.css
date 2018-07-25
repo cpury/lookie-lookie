@@ -118,7 +118,8 @@ a {
 
 #training table {
   width: 100%;
-  font-size: 20pt;
+  font-size: 16pt;
+  font-family: 'Source Code Pro', monospace;
 }
 
 #training table td:nth-child(2) {
@@ -133,10 +134,11 @@ button {
   position: relative;
   z-index: 11;
   cursor: pointer;
-  font-size: 16pt;
-  padding: 0.125em 0.25em;
-  margin: 0.25em;
-  width: 160px;
+  font-size: 10pt;
+  padding: 0.125em 0em;
+  margin: 0.1em;
+  width: 140px;
+  font-family: 'Source Code Pro', monospace;
 }
 
 #heatMap {
