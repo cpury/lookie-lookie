@@ -4,11 +4,11 @@ window.training = {
   epochsTrained: 0,
 
   createModel: function() {
-    var input_image = tf.input({
+    var inputImage = tf.input({
       name: 'image',
       shape: [dataset.inputHeight, dataset.inputWidth, 3],
     });
-    var input_meta = tf.input({
+    var inputMeta = tf.input({
       name: 'metaInfos',
       shape: [4],
     });
@@ -19,14 +19,18 @@ window.training = {
       strides: 1,
       activation: 'relu',
       kernelInitializer: 'varianceScaling',
-    }).apply(input_image);
+    }).apply(inputImage);
+
     var maxpool = tf.layers.maxPooling2d({
       poolSize: [2, 2],
       strides: [2, 2],
     }).apply(conv);
+
     var flat = tf.layers.flatten().apply(maxpool);
 
-    var concat = tf.layers.concatenate().apply([flat, input_meta]);
+    var dropout = tf.layers.dropout(0.2).apply(flat);
+
+    var concat = tf.layers.concatenate().apply([dropout, inputMeta]);
 
     var output = tf.layers.dense({
       units: 2,
@@ -34,7 +38,7 @@ window.training = {
       kernelInitializer: 'varianceScaling',
     }).apply(concat);
 
-    var model = tf.model({inputs: [input_image, input_meta], outputs: output});
+    var model = tf.model({inputs: [inputImage, inputMeta], outputs: output});
 
     return model;
   },
@@ -47,6 +51,7 @@ window.training = {
     if (training.epochsTrained == 0) {
       epochs *= 2;
     }
+    epochs = Math.min(100, epochs);
 
     var batchSize = Math.floor(dataset.train.n * 0.1);
     if (batchSize < 4) {
