@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
   var vid = document.getElementById('webcam');
   var overlay = document.getElementById('overlay');
 
@@ -13,7 +13,7 @@ $(document).ready(function() {
     currentPosition: null,
     currentEyeRect: null,
 
-    adjustVideoProportions: function() {
+    adjustVideoProportions: function () {
       // resize overlay and video if proportions of video are not 4:3
       // keep same height, just change width
       var proportion = facetracker.vid.videoWidth / facetracker.vid.videoHeight;
@@ -22,7 +22,7 @@ $(document).ready(function() {
       facetracker.overlay.width = facetracker.vidWidth;
     },
 
-    gumSuccess: function(stream) {
+    gumSuccess: function (stream) {
       ui.onWebcamEnabled();
 
       // add camera stream if getUserMedia succeeded
@@ -32,12 +32,12 @@ $(document).ready(function() {
         facetracker.vid.src = (window.URL && window.URL.createObjectURL(stream));
       }
 
-      facetracker.vid.onloadedmetadata = function() {
+      facetracker.vid.onloadedmetadata = function () {
         facetracker.adjustVideoProportions();
         facetracker.vid.play();
       };
 
-      facetracker.vid.onresize = function() {
+      facetracker.vid.onresize = function () {
         facetracker.adjustVideoProportions();
         if (facetracker.trackingStarted) {
           facetracker.ctrack.stop();
@@ -47,11 +47,11 @@ $(document).ready(function() {
       };
     },
 
-    gumFail: function() {
+    gumFail: function () {
       ui.showInfo('There was some problem trying to fetch video from your webcam 😭', true);
     },
 
-    startVideo: function() {
+    startVideo: function () {
       // start video
       facetracker.vid.play();
       // start tracking
@@ -61,7 +61,7 @@ $(document).ready(function() {
       facetracker.positionLoop();
     },
 
-    positionLoop: function() {
+    positionLoop: function () {
       // Check if a face is detected, and if so, track it.
       requestAnimationFrame(facetracker.positionLoop);
       facetracker.currentPosition = facetracker.ctrack.getCurrentPosition();
@@ -73,7 +73,7 @@ $(document).ready(function() {
       }
     },
 
-    getEyesRect: function(position) {
+    getEyesRect: function (position) {
       // Given a tracked face, returns a rectangle surrounding the eyes.
       var minX = position[19][0] + 3;
       var maxX = position[15][0] - 3;
@@ -86,7 +86,7 @@ $(document).ready(function() {
       return [minX, minY, width, height * 1.25];
     },
 
-    trackFace: function(position) {
+    trackFace: function (position) {
       // Given a tracked face, crops out the eyes and draws them in the eyes canvas.
       var rect = facetracker.getEyesRect(position);
       facetracker.currentEyeRect = rect;
@@ -107,11 +107,15 @@ $(document).ready(function() {
 
   // set up video
   if (navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({video : true})
-    .then(facetracker.gumSuccess)
-    .catch(facetracker.gumFail);
+    navigator.mediaDevices.getUserMedia({
+        video: true
+      })
+      .then(facetracker.gumSuccess)
+      .catch(facetracker.gumFail);
   } else if (navigator.getUserMedia) {
-    navigator.getUserMedia({video : true}, facetracker.gumSuccess, facetracker.gumFail);
+    navigator.getUserMedia({
+      video: true
+    }, facetracker.gumSuccess, facetracker.gumFail);
   } else {
     ui.showInfo('Your browser does not seem to support getUserMedia. 😭 This will probably only work in Chrome or Firefox.', true);
   }

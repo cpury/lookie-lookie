@@ -3,7 +3,7 @@ window.training = {
   inTraining: false,
   epochsTrained: 0,
 
-  createModel: function() {
+  createModel: function () {
     var inputImage = tf.input({
       name: 'image',
       shape: [dataset.inputHeight, dataset.inputWidth, 3],
@@ -38,27 +38,21 @@ window.training = {
       kernelInitializer: 'varianceScaling',
     }).apply(concat);
 
-    var model = tf.model({inputs: [inputImage, inputMeta], outputs: output});
+    var model = tf.model({
+      inputs: [inputImage, inputMeta],
+      outputs: output
+    });
 
     return model;
   },
 
-  fitModel: function() {
+  fitModel: function () {
     // TODO Set params in UI?
     this.inTraining = true;
-    var epochs = 4 + Math.floor(dataset.train.n * 0.2);
-
-    if (training.epochsTrained == 0) {
-      epochs *= 2;
-    }
-    epochs = Math.min(100, epochs);
+    var epochs = 10;
 
     var batchSize = Math.floor(dataset.train.n * 0.1);
-    if (batchSize < 4) {
-      batchSize = 4;
-    } else if (batchSize > 64) {
-      batchSize = 64;
-    }
+    batchSize = Math.max(2, Math.min(batchSize, 64));
 
     $('#start-training').prop('disabled', true);
     $('#start-training').html('In Progress...');
@@ -87,7 +81,7 @@ window.training = {
       shuffle: true,
       validationData: [dataset.val.x, dataset.val.y],
       callbacks: {
-        onEpochEnd: async function(epoch, logs) {
+        onEpochEnd: async function (epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
           training.epochsTrained += 1;
           ui.setContent('n-epochs', training.epochsTrained);
@@ -106,7 +100,7 @@ window.training = {
 
           return await tf.nextFrame();
         },
-        onTrainEnd: async function() {
+        onTrainEnd: async function () {
           console.info('Finished training');
 
           // Load best model:
@@ -127,7 +121,7 @@ window.training = {
     });
   },
 
-  resetModel: function() {
+  resetModel: function () {
     $('#reset-model').prop('disabled', true);
     training.currentModel = null;
     training.epochsTrained = 0;
@@ -137,9 +131,9 @@ window.training = {
     $('#reset-model').prop('disabled', false);
   },
 
-  getPrediction: function() {
+  getPrediction: function () {
     // Return relative x, y where we expect the user to look right now.
-    return tf.tidy(function() {
+    return tf.tidy(function () {
       var img = dataset.getImage();
       img = dataset.convertImage(img);
       var metaInfos = dataset.getMetaInfos();

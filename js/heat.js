@@ -1,5 +1,5 @@
 window.heatmap = {
-  getHeatColor: function(value, alpha) {
+  getHeatColor: function (value, alpha) {
     // Adapted from https://stackoverflow.com/a/17268489/1257278
     if (typeof alpha == 'undefined') {
       alpha = 1.0;
@@ -8,7 +8,7 @@ window.heatmap = {
     return 'hsla(' + hue + ',100%,50%,' + alpha + ')';
   },
 
-  fillHeatmap: function(data, model, ctx, width, height, radius) {
+  fillHeatmap: function (data, model, ctx, width, height, radius) {
     // Go through a dataset and fill the context with the corresponding circles.
     var predictions = model.predict(data.x);
 
@@ -32,7 +32,7 @@ window.heatmap = {
     }
   },
 
-  drawHeatmap: function(dataset, model) {
+  drawHeatmap: function (dataset, model) {
     $('#draw-heatmap').prop('disabled', true);
     $('#draw-heatmap').html('In Progress...');
 
@@ -54,7 +54,7 @@ window.heatmap = {
     $('#draw-heatmap').html('Draw Heatmap');
   },
 
-  clearHeatmap: function() {
+  clearHeatmap: function () {
     $('#clear-heatmap').prop('disabled', true);
 
     var heatmap = $('#heatMap')[0];
