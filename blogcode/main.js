@@ -100,7 +100,6 @@ $(document).ready(function () {
 
   function captureExample() {
     // Take the latest image from the eyes canvas and add it to our dataset.
-    // Takes the coordinates of the ball.
     tf.tidy(function() {
       const image = getImage();
       const mousePos = tf.tensor1d([mouse.x, mouse.y]).expandDims(0);
