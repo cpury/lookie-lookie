@@ -6,26 +6,16 @@ body, html {
   color: rgba(0, 0, 0, 0.8);
 }
 
-#video-container, #webcam, #overlay {
-  /* width: 50%;
-  height: 50%; */
+#webcam, #overlay {
   position: absolute;
   top: 0;
   left: 0;
 }
 
 #eyes {
-  /* width: 200px;
-  height: 100px; */
   position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
-#temp {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  top: 0;
+  left: 400px;
 }
 
 #target {

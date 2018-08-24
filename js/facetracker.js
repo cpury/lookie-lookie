@@ -91,15 +91,22 @@ $(document).ready(function () {
       var rect = facetracker.getEyesRect(position);
       facetracker.currentEyeRect = rect;
 
-      var tempCanvas = document.getElementById('temp');
-      var tempCtx = tempCanvas.getContext('2d');
       var eyesCanvas = document.getElementById('eyes');
       var eyesCtx = eyesCanvas.getContext('2d');
 
-      tempCtx.drawImage(facetracker.vid, 0, 0, facetracker.vidWidth, facetracker.vidHeight);
-      eyesCtx.drawImage(tempCanvas, rect[0], rect[1], rect[2], rect[3], 0, 0, eyesCanvas.width, eyesCanvas.height);
-      tempCtx.strokeStyle = 'green';
-      tempCtx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+      // Resize because the underlying video might be a different resolution:
+      var resizeFactorX = facetracker.vid.videoWidth / facetracker.vidWidth;
+      var resizeFactorY = facetracker.vid.videoHeight / facetracker.vidHeight;
+
+      // facetracker.overlayCC.drawImage(facetracker.vid, 0, 0, facetracker.vidWidth, facetracker.vidHeight);
+      facetracker.overlayCC.strokeStyle = 'red';
+      facetracker.overlayCC.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+      eyesCtx.drawImage(
+        facetracker.vid,
+        rect[0] * resizeFactorX, rect[1] * resizeFactorY,
+        rect[2] * resizeFactorX, rect[3] * resizeFactorY,
+        0, 0, eyesCanvas.width, eyesCanvas.height
+      );
     }
   };
 

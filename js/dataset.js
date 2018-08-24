@@ -28,14 +28,12 @@ window.dataset = {
     // - angle of rectangle (TODO)
     var x = facetracker.currentEyeRect[0] + (facetracker.currentEyeRect[2] / 2);
     var y = facetracker.currentEyeRect[1] + (facetracker.currentEyeRect[3] / 2);
-    var canvasWidth = $('#temp').width();
-    var canvasHeight = $('#temp').height();
 
-    x = (x / canvasWidth) * 2 - 1;
-    y = (y / canvasHeight) * 2 - 1;
+    x = (x / facetracker.vidWidth) * 2 - 1;
+    y = (y / facetracker.vidHeight) * 2 - 1;
 
-    var rectWidth = facetracker.currentEyeRect[2] / canvasWidth;
-    var rectHeight = facetracker.currentEyeRect[3] / canvasHeight;
+    var rectWidth = facetracker.currentEyeRect[2] / facetracker.vidWidth;
+    var rectHeight = facetracker.currentEyeRect[3] / facetracker.vidHeight;
 
     if (mirror) {
       x = 1 - x;
