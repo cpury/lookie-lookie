@@ -12,41 +12,44 @@ window.dataset = {
     y: null,
   },
 
-  getImage: function () {
+  getImage: function() {
     // Capture the current image in the eyes canvas as a tensor.
-    return tf.tidy(function () {
+    return tf.tidy(function() {
       var image = tf.fromPixels(document.getElementById('eyes'));
       var batchedImage = image.expandDims(0);
-      return batchedImage.toFloat().div(tf.scalar(127)).sub(tf.scalar(1));
+      return batchedImage
+        .toFloat()
+        .div(tf.scalar(127))
+        .sub(tf.scalar(1));
     });
   },
 
-  getMetaInfos: function (mirror) {
+  getMetaInfos: function(mirror) {
     // Get some meta info about the rectangle as a tensor:
     // - middle x, y of the eye rectangle, relative to video size
     // - size of eye rectangle, relative to video size
     // - angle of rectangle (TODO)
-    var x = facetracker.currentEyeRect[0] + (facetracker.currentEyeRect[2] / 2);
-    var y = facetracker.currentEyeRect[1] + (facetracker.currentEyeRect[3] / 2);
+    var x = facetracker.currentEyeRect[0] + facetracker.currentEyeRect[2] / 2;
+    var y = facetracker.currentEyeRect[1] + facetracker.currentEyeRect[3] / 2;
 
     x = (x / facetracker.videoWidthExternal) * 2 - 1;
     y = (y / facetracker.videoHeightExternal) * 2 - 1;
 
-    var rectWidth = facetracker.currentEyeRect[2] / facetracker.videoWidthExternal;
-    var rectHeight = facetracker.currentEyeRect[3] / facetracker.videoHeightExternal;
+    var rectWidth =
+      facetracker.currentEyeRect[2] / facetracker.videoWidthExternal;
+    var rectHeight =
+      facetracker.currentEyeRect[3] / facetracker.videoHeightExternal;
 
     if (mirror) {
       x = 1 - x;
       y = 1 - y;
     }
-    return tf.tidy(function () {
-      return tf.tensor1d([
-        x, y, rectWidth, rectHeight,
-      ]).expandDims(0);
+    return tf.tidy(function() {
+      return tf.tensor1d([x, y, rectWidth, rectHeight]).expandDims(0);
     });
   },
 
-  whichDataset: function () {
+  whichDataset: function() {
     // Returns 'train' or 'val' depending on what makes sense / is random.
     if (dataset.train.n == 0) {
       return 'train';
@@ -71,11 +74,11 @@ window.dataset = {
     b = Math.pow(b, exponent);
 
     // Gleam:
-    var gleam = ((r + g + b) / 3);
+    var gleam = (r + g + b) / 3;
     return gleam * 2 - 1;
   },
 
-  convertImage: function (image) {
+  convertImage: function(image) {
     // Convert to grayscale and add spatial info
     var imageShape = image.shape;
     var w = imageShape[1];
@@ -88,8 +91,8 @@ window.dataset = {
       for (var y = 0; y < h; y++) {
         data[0][x][y] = [
           dataset.rgbToGrayscale(image, 0, x, y),
-          x / w * 2 - 1,
-          y / h * 2 - 1,
+          (x / w) * 2 - 1,
+          (y / h) * 2 - 1,
         ];
       }
     }
@@ -97,15 +100,12 @@ window.dataset = {
     return tf.tensor(data);
   },
 
-  addToDataset: function (image, metaInfos, target, key) {
+  addToDataset: function(image, metaInfos, target, key) {
     // Add the given x, y to either 'train' or 'val'.
     var set = dataset[key];
 
     if (set.x == null) {
-      set.x = [
-        tf.keep(image),
-        tf.keep(metaInfos),
-      ];
+      set.x = [tf.keep(image), tf.keep(metaInfos)];
       set.y = tf.keep(target);
     } else {
       var oldImage = set.x[0];
@@ -126,11 +126,11 @@ window.dataset = {
     set.n += 1;
   },
 
-  addExample: function (image, metaInfos, target) {
+  addExample: function(image, metaInfos, target) {
     // Given an image, eye pos and target coordinates, adds them to our dataset.
     target[0] = target[0] - 0.5;
     target[1] = target[1] - 0.5;
-    target = tf.tidy(function () {
+    target = tf.tidy(function() {
       return tf.tensor1d(target).expandDims(0);
     });
     var key = dataset.whichDataset();
@@ -142,10 +142,10 @@ window.dataset = {
     ui.onAddExample(dataset.train.n, dataset.val.n);
   },
 
-  captureExample: function () {
+  captureExample: function() {
     // Take the latest image from the eyes canvas and add it to our dataset.
     // Takes the coordinates of the mouse.
-    tf.tidy(function () {
+    tf.tidy(function() {
       var img = dataset.getImage();
       var mousePos = mouse.getMousePos();
       var metaInfos = dataset.getMetaInfos();
@@ -153,8 +153,8 @@ window.dataset = {
     });
   },
 
-  toJSON: function () {
-    var tensorToArray = function (t) {
+  toJSON: function() {
+    var tensorToArray = function(t) {
       var typedArray = t.dataSync();
       return Array.prototype.slice.call(typedArray);
     };
@@ -188,10 +188,10 @@ window.dataset = {
         ],
         y: tensorToArray(dataset.val.y),
       },
-    }
+    };
   },
 
-  fromJSON: function (data) {
+  fromJSON: function(data) {
     dataset.inputWidth = data.inputWidth;
     dataset.inputHeight = data.inputHeight;
     dataset.train.n = data.train.n;
@@ -208,5 +208,5 @@ window.dataset = {
     dataset.val.y = tf.tensor(data.val.y, data.val.shapes.y);
 
     ui.onAddExample(dataset.train.n, dataset.val.n);
-  }
+  },
 };

@@ -23,7 +23,7 @@ window.ui = {
 
   onWebcamEnabled: function() {
     this.state = 'finding face';
-    this.showInfo('Thanks! Now let\'s find your face! 🤨', true);
+    this.showInfo("Thanks! Now let's find your face! 🤨", true);
   },
 
   onFoundFace: function() {
@@ -31,9 +31,9 @@ window.ui = {
       this.state = 'collecting';
       this.readyToCollect = true;
       this.showInfo(
-        '<h3>Let\'s start! 🙂</h3>' +
-        'Move you mouse over the screen, follow it with your eyes and hit the space key about once per second 👀',
-        true
+        "<h3>Let's start! 🙂</h3>" +
+          'Move you mouse over the screen, follow it with your eyes and hit the space key about once per second 👀',
+        true,
       );
     }
   },
@@ -49,13 +49,13 @@ window.ui = {
     if (this.state == 'collecting' && this.nExamples == 20) {
       this.showInfo(
         '<h3>Great job! 👌</h3>' +
-        'Now that you have a handful of examples, let\'s train the neural network!'
+          "Now that you have a handful of examples, let's train the neural network!",
       );
     }
     if (this.state == 'trained' && this.nExamples == 50) {
       this.showInfo(
         '<h3>Fantastic 👏</h3>' +
-        'You\'ve collected lots of examples. Let\'s try training again!'
+          "You've collected lots of examples. Let's try training again!",
       );
     }
     if (nTrain > 0 && nVal > 0) {
@@ -75,28 +75,28 @@ window.ui = {
       this.state = 'trained';
       this.showInfo(
         '<h3>Awesome! 😍</h3>' +
-        'The green target should start following your eyes around.<br>' +
-        'I guess it\'s still very bad... 😅<br>' +
-        'Let\'s collect more training data!'
+          'The green target should start following your eyes around.<br>' +
+          "I guess it's still very bad... 😅<br>" +
+          "Let's collect more training data!",
       );
     } else if (this.nTrainings == 2) {
       this.state = 'trained_twice';
       this.showInfo(
         '<h3>Getting better! 🚀</h3>' +
-        'Keep collecting and retraining!<br>' +
-        'You can also draw a heatmap that shows you where your ' +
-        'model has its strong and weak points.'
+          'Keep collecting and retraining!<br>' +
+          'You can also draw a heatmap that shows you where your ' +
+          'model has its strong and weak points.',
       );
     } else if (this.nTrainings == 3) {
       this.state = 'trained_thrice';
       this.showInfo(
-        'If your model is overfitting, remember you can reset it anytime 👻'
+        'If your model is overfitting, remember you can reset it anytime 👻',
       );
     } else if (this.nTrainings == 4) {
       this.state = 'trained_thrice';
       this.showInfo(
         '<h3>Have fun!</h3>' +
-        'Check out more of my stuff at <a href="https://cpury.github.io/" target="_blank">cpury.github.io</a> 😄'
+          'Check out more of my stuff at <a href="https://cpury.github.io/" target="_blank">cpury.github.io</a> 😄',
       );
     }
   },

@@ -3,7 +3,7 @@ window.training = {
   inTraining: false,
   epochsTrained: 0,
 
-  createModel: function () {
+  createModel: function() {
     var inputImage = tf.input({
       name: 'image',
       shape: [dataset.inputHeight, dataset.inputWidth, 3],
@@ -13,18 +13,22 @@ window.training = {
       shape: [4],
     });
 
-    var conv = tf.layers.conv2d({
-      kernelSize: 5,
-      filters: 20,
-      strides: 1,
-      activation: 'relu',
-      kernelInitializer: 'varianceScaling',
-    }).apply(inputImage);
+    var conv = tf.layers
+      .conv2d({
+        kernelSize: 5,
+        filters: 20,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+      .apply(inputImage);
 
-    var maxpool = tf.layers.maxPooling2d({
-      poolSize: [2, 2],
-      strides: [2, 2],
-    }).apply(conv);
+    var maxpool = tf.layers
+      .maxPooling2d({
+        poolSize: [2, 2],
+        strides: [2, 2],
+      })
+      .apply(conv);
 
     var flat = tf.layers.flatten().apply(maxpool);
 
@@ -32,21 +36,23 @@ window.training = {
 
     var concat = tf.layers.concatenate().apply([dropout, inputMeta]);
 
-    var output = tf.layers.dense({
-      units: 2,
-      activation: 'tanh',
-      kernelInitializer: 'varianceScaling',
-    }).apply(concat);
+    var output = tf.layers
+      .dense({
+        units: 2,
+        activation: 'tanh',
+        kernelInitializer: 'varianceScaling',
+      })
+      .apply(concat);
 
     var model = tf.model({
       inputs: [inputImage, inputMeta],
-      outputs: output
+      outputs: output,
     });
 
     return model;
   },
 
-  fitModel: function () {
+  fitModel: function() {
     // TODO Set params in UI?
     this.inTraining = true;
     var epochs = 10;
@@ -81,7 +87,7 @@ window.training = {
       shuffle: true,
       validationData: [dataset.val.x, dataset.val.y],
       callbacks: {
-        onEpochEnd: async function (epoch, logs) {
+        onEpochEnd: async function(epoch, logs) {
           console.info('Epoch', epoch, 'losses:', logs);
           training.epochsTrained += 1;
           ui.setContent('n-epochs', training.epochsTrained);
@@ -100,7 +106,7 @@ window.training = {
 
           return await tf.nextFrame();
         },
-        onTrainEnd: async function () {
+        onTrainEnd: async function() {
           console.info('Finished training');
 
           // Load best model:
@@ -117,11 +123,11 @@ window.training = {
           training.inTraining = false;
           ui.onFinishTraining();
         },
-      }
+      },
     });
   },
 
-  resetModel: function () {
+  resetModel: function() {
     $('#reset-model').prop('disabled', true);
     training.currentModel = null;
     training.epochsTrained = 0;
@@ -131,9 +137,9 @@ window.training = {
     $('#reset-model').prop('disabled', false);
   },
 
-  getPrediction: function () {
+  getPrediction: function() {
     // Return relative x, y where we expect the user to look right now.
-    return tf.tidy(function () {
+    return tf.tidy(function() {
       var img = dataset.getImage();
       img = dataset.convertImage(img);
       var metaInfos = dataset.getMetaInfos();
