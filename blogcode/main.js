@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(function() {
   const video = document.getElementById('webcam');
   const overlay = document.getElementById('overlay');
   const overlayCC = overlay.getContext('2d');
@@ -43,9 +43,14 @@ $(document).ready(function () {
 
       eyesCC.drawImage(
         video,
-        eyesRect[0] * resizeFactorX, eyesRect[1] * resizeFactorY,
-        eyesRect[2] * resizeFactorX, eyesRect[3] * resizeFactorY,
-        0, 0, eyesCanvas.width, eyesCanvas.height
+        eyesRect[0] * resizeFactorX,
+        eyesRect[1] * resizeFactorY,
+        eyesRect[2] * resizeFactorX,
+        eyesRect[3] * resizeFactorY,
+        0,
+        0,
+        eyesCanvas.width,
+        eyesCanvas.height,
       );
     }
   }
@@ -56,9 +61,11 @@ $(document).ready(function () {
     trackingLoop();
   }
 
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-  }).then(onStreaming);
+  navigator.mediaDevices
+    .getUserMedia({
+      video: true,
+    })
+    .then(onStreaming);
 
   // Track mouse movement:
   const mouse = {
@@ -81,7 +88,10 @@ $(document).ready(function () {
       // Add a batch dimension:
       const batchedImage = image.expandDims(0);
       // Normalize and return it:
-      return batchedImage.toFloat().div(tf.scalar(127)).sub(tf.scalar(1));
+      return batchedImage
+        .toFloat()
+        .div(tf.scalar(127))
+        .sub(tf.scalar(1));
     });
   }
 
@@ -123,7 +133,7 @@ $(document).ready(function () {
       // Increase counter
       subset.n += 1;
     });
-  };
+  }
 
   $('body').keyup(function(event) {
     // On space key:
@@ -140,28 +150,34 @@ $(document).ready(function () {
   function createModel() {
     const model = tf.sequential();
 
-    model.add(tf.layers.conv2d({
-      kernelSize: 5,
-      filters: 20,
-      strides: 1,
-      activation: 'relu',
-      inputShape: [$('#eyes').height(), $('#eyes').width(), 3],
-    }));
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: 5,
+        filters: 20,
+        strides: 1,
+        activation: 'relu',
+        inputShape: [$('#eyes').height(), $('#eyes').width(), 3],
+      }),
+    );
 
-    model.add(tf.layers.maxPooling2d({
-      poolSize: [2, 2],
-      strides: [2, 2],
-    }));
+    model.add(
+      tf.layers.maxPooling2d({
+        poolSize: [2, 2],
+        strides: [2, 2],
+      }),
+    );
 
     model.add(tf.layers.flatten());
 
     model.add(tf.layers.dropout(0.2));
 
     // Two output values x and y
-    model.add(tf.layers.dense({
-      units: 2,
-      activation: 'tanh',
-    }));
+    model.add(
+      tf.layers.dense({
+        units: 2,
+        activation: 'tanh',
+      }),
+    );
 
     // Use ADAM optimizer with learning rate of 0.0005 and MSE loss
     model.compile({
@@ -170,7 +186,7 @@ $(document).ready(function () {
     });
 
     return model;
-  };
+  }
 
   function fitModel() {
     let batchSize = Math.floor(dataset.train.n * 0.1);
@@ -184,23 +200,13 @@ $(document).ready(function () {
       currentModel = createModel();
     }
 
-    console.info('Training on', dataset.train.n, 'samples');
-
     currentModel.fit(dataset.train.x, dataset.train.y, {
       batchSize: batchSize,
       epochs: 20,
       shuffle: true,
       validationData: [dataset.val.x, dataset.val.y],
-      callbacks: {
-        onEpochEnd: async function(epoch, logs) {
-          console.info('Epoch', epoch, 'losses:', logs);
-        },
-        onTrainEnd: function() {
-          console.info('Training finished');
-        },
-      }
     });
-  };
+  }
 
   $('#train').click(function() {
     fitModel();
@@ -217,8 +223,10 @@ $(document).ready(function () {
       // Convert normalized position back to screen position:
       const targetWidth = $('#target').outerWidth();
       const targetHeight = $('#target').outerHeight();
-      const x = (prediction.get(0, 0) + 1) / 2 * ($(window).width() - targetWidth);
-      const y = (prediction.get(0, 1) + 1) / 2 * ($(window).height() - targetHeight);
+      const x =
+        ((prediction.get(0, 0) + 1) / 2) * ($(window).width() - targetWidth);
+      const y =
+        ((prediction.get(0, 1) + 1) / 2) * ($(window).height() - targetHeight);
 
       // Move target there:
       const $target = $('#target');
