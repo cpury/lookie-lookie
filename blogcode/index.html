@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<body>
+    <video id="webcam" width="400" height="300" autoplay></video>
+    <canvas id="overlay" width="400" height="300"></canvas>
+    <style>
+        #webcam, #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+
+    <canvas id="eyes" width="50" height="25"></canvas>
+    <style>
+        #eyes {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    </style>
+
+    <button id="train">Train!</button>
+    <style>
+        #train {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24pt;
+        }
+    </style>
+
+    <div id="target"></div>
+    <style>
+        #target {
+            background-color: lightgreen;
+            position: absolute;
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 20px 10px white;
+            border: 4px solid rgba(0,0,0,0.5);
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.0"></script>
+    <script src="clmtrackr.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
