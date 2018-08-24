@@ -29,11 +29,11 @@ window.dataset = {
     var x = facetracker.currentEyeRect[0] + (facetracker.currentEyeRect[2] / 2);
     var y = facetracker.currentEyeRect[1] + (facetracker.currentEyeRect[3] / 2);
 
-    x = (x / facetracker.vidWidth) * 2 - 1;
-    y = (y / facetracker.vidHeight) * 2 - 1;
+    x = (x / facetracker.videoWidthExternal) * 2 - 1;
+    y = (y / facetracker.videoHeightExternal) * 2 - 1;
 
-    var rectWidth = facetracker.currentEyeRect[2] / facetracker.vidWidth;
-    var rectHeight = facetracker.currentEyeRect[3] / facetracker.vidHeight;
+    var rectWidth = facetracker.currentEyeRect[2] / facetracker.videoWidthExternal;
+    var rectHeight = facetracker.currentEyeRect[3] / facetracker.videoHeightExternal;
 
     if (mirror) {
       x = 1 - x;
