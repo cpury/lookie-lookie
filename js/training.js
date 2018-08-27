@@ -4,16 +4,16 @@ window.training = {
   epochsTrained: 0,
 
   createModel: function() {
-    var inputImage = tf.input({
+    const inputImage = tf.input({
       name: 'image',
       shape: [dataset.inputHeight, dataset.inputWidth, 3],
     });
-    var inputMeta = tf.input({
+    const inputMeta = tf.input({
       name: 'metaInfos',
       shape: [4],
     });
 
-    var conv = tf.layers
+    const conv = tf.layers
       .conv2d({
         kernelSize: 5,
         filters: 20,
@@ -23,20 +23,20 @@ window.training = {
       })
       .apply(inputImage);
 
-    var maxpool = tf.layers
+    const maxpool = tf.layers
       .maxPooling2d({
         poolSize: [2, 2],
         strides: [2, 2],
       })
       .apply(conv);
 
-    var flat = tf.layers.flatten().apply(maxpool);
+    const flat = tf.layers.flatten().apply(maxpool);
 
-    var dropout = tf.layers.dropout(0.2).apply(flat);
+    const dropout = tf.layers.dropout(0.2).apply(flat);
 
-    var concat = tf.layers.concatenate().apply([dropout, inputMeta]);
+    const concat = tf.layers.concatenate().apply([dropout, inputMeta]);
 
-    var output = tf.layers
+    const output = tf.layers
       .dense({
         units: 2,
         activation: 'tanh',
@@ -44,7 +44,7 @@ window.training = {
       })
       .apply(concat);
 
-    var model = tf.model({
+    const model = tf.model({
       inputs: [inputImage, inputMeta],
       outputs: output,
     });
@@ -55,9 +55,9 @@ window.training = {
   fitModel: function() {
     // TODO Set params in UI?
     this.inTraining = true;
-    var epochs = 10;
+    const epochs = 10;
 
-    var batchSize = Math.floor(dataset.train.n * 0.1);
+    let batchSize = Math.floor(dataset.train.n * 0.1);
     batchSize = Math.max(2, Math.min(batchSize, 64));
 
     $('#start-training').prop('disabled', true);
@@ -71,10 +71,10 @@ window.training = {
 
     ui.state = 'training';
 
-    var bestEpoch = -1;
-    var bestTrainLoss = Number.MAX_SAFE_INTEGER;
-    var bestValLoss = Number.MAX_SAFE_INTEGER;
-    var bestModelPath = 'localstorage://best-model';
+    let bestEpoch = -1;
+    let bestTrainLoss = Number.MAX_SAFE_INTEGER;
+    let bestValLoss = Number.MAX_SAFE_INTEGER;
+    const bestModelPath = 'localstorage://best-model';
 
     training.currentModel.compile({
       optimizer: tf.train.adam(0.0005),

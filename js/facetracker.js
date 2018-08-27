@@ -1,6 +1,6 @@
 $(document).ready(function() {
-  var video = document.getElementById('webcam');
-  var overlay = document.getElementById('overlay');
+  const video = document.getElementById('webcam');
+  const overlay = document.getElementById('overlay');
 
   window.facetracker = {
     video: video,
@@ -20,7 +20,7 @@ $(document).ready(function() {
       // keep same height, just change width
       facetracker.videoWidthInternal = video.videoWidth;
       facetracker.videoHeightInternal = video.videoHeight;
-      var proportion =
+      const proportion =
         facetracker.videoWidthInternal / facetracker.videoHeightInternal;
       facetracker.videoWidthExternal = Math.round(
         facetracker.videoHeightExternal * proportion,
@@ -91,16 +91,16 @@ $(document).ready(function() {
 
     getEyesRect: function(position) {
       // Given a tracked face, returns a rectangle surrounding the eyes.
-      var minX = position[19][0] + 3;
-      var maxX = position[15][0] - 3;
-      var minY =
+      const minX = position[19][0] + 3;
+      const maxX = position[15][0] - 3;
+      const minY =
         Math.min(
           position[20][1],
           position[21][1],
           position[17][1],
           position[16][1],
         ) + 6;
-      var maxY =
+      const maxY =
         Math.max(
           position[23][1],
           position[26][1],
@@ -108,24 +108,24 @@ $(document).ready(function() {
           position[28][1],
         ) + 3;
 
-      var width = maxX - minX;
-      var height = maxY - minY - 5;
+      const width = maxX - minX;
+      const height = maxY - minY - 5;
 
       return [minX, minY, width, height * 1.25];
     },
 
     trackFace: function(position) {
       // Given a tracked face, crops out the eyes and draws them in the eyes canvas.
-      var rect = facetracker.getEyesRect(position);
+      const rect = facetracker.getEyesRect(position);
       facetracker.currentEyeRect = rect;
 
-      var eyesCanvas = document.getElementById('eyes');
-      var eyesCtx = eyesCanvas.getContext('2d');
+      const eyesCanvas = document.getElementById('eyes');
+      const eyesCtx = eyesCanvas.getContext('2d');
 
       // Resize because the underlying video might be a different resolution:
-      var resizeFactorX =
+      const resizeFactorX =
         facetracker.videoWidthInternal / facetracker.videoWidthExternal;
-      var resizeFactorY =
+      const resizeFactorY =
         facetracker.videoHeightInternal / facetracker.videoHeightExternal;
 
       facetracker.overlayCC.strokeStyle = 'red';

@@ -7,7 +7,7 @@ window.supports_h264_baseline_video = function() {
   if (!supports_video()) {
     return false;
   }
-  var v = document.createElement('video');
+  const v = document.createElement('video');
   return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
 };
 
@@ -15,7 +15,7 @@ window.supports_webm_video = function() {
   if (!supports_video()) {
     return false;
   }
-  var v = document.createElement('video');
+  const v = document.createElement('video');
   return v.canPlayType('video/webm; codecs="vp8"');
 };
 

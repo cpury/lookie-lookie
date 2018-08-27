@@ -15,8 +15,8 @@ window.dataset = {
   getImage: function() {
     // Capture the current image in the eyes canvas as a tensor.
     return tf.tidy(function() {
-      var image = tf.fromPixels(document.getElementById('eyes'));
-      var batchedImage = image.expandDims(0);
+      const image = tf.fromPixels(document.getElementById('eyes'));
+      const batchedImage = image.expandDims(0);
       return batchedImage
         .toFloat()
         .div(tf.scalar(127))
@@ -29,15 +29,15 @@ window.dataset = {
     // - middle x, y of the eye rectangle, relative to video size
     // - size of eye rectangle, relative to video size
     // - angle of rectangle (TODO)
-    var x = facetracker.currentEyeRect[0] + facetracker.currentEyeRect[2] / 2;
-    var y = facetracker.currentEyeRect[1] + facetracker.currentEyeRect[3] / 2;
+    let x = facetracker.currentEyeRect[0] + facetracker.currentEyeRect[2] / 2;
+    let y = facetracker.currentEyeRect[1] + facetracker.currentEyeRect[3] / 2;
 
     x = (x / facetracker.videoWidthExternal) * 2 - 1;
     y = (y / facetracker.videoHeightExternal) * 2 - 1;
 
-    var rectWidth =
+    const rectWidth =
       facetracker.currentEyeRect[2] / facetracker.videoWidthExternal;
-    var rectHeight =
+    const rectHeight =
       facetracker.currentEyeRect[3] / facetracker.videoHeightExternal;
 
     if (mirror) {
@@ -63,32 +63,32 @@ window.dataset = {
   rgbToGrayscale(image, n, x, y) {
     // Given an rgb tensor, returns a grayscale value.
     // Inspired by http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0029740
-    var r = (image.get(n, x, y, 0) + 1) / 2;
-    var g = (image.get(n, x, y, 1) + 1) / 2;
-    var b = (image.get(n, x, y, 2) + 1) / 2;
+    let r = (image.get(n, x, y, 0) + 1) / 2;
+    let g = (image.get(n, x, y, 1) + 1) / 2;
+    let b = (image.get(n, x, y, 2) + 1) / 2;
 
     // Gamma correction:
-    var exponent = 1 / 2.2;
+    const exponent = 1 / 2.2;
     r = Math.pow(r, exponent);
     g = Math.pow(g, exponent);
     b = Math.pow(b, exponent);
 
     // Gleam:
-    var gleam = (r + g + b) / 3;
+    const gleam = (r + g + b) / 3;
     return gleam * 2 - 1;
   },
 
   convertImage: function(image) {
     // Convert to grayscale and add spatial info
-    var imageShape = image.shape;
-    var w = imageShape[1];
-    var h = imageShape[2];
+    const imageShape = image.shape;
+    const w = imageShape[1];
+    const h = imageShape[2];
 
-    var data = [new Array(w)];
-    for (var x = 0; x < w; x++) {
+    const data = [new Array(w)];
+    for (let x = 0; x < w; x++) {
       data[0][x] = new Array(h);
 
-      for (var y = 0; y < h; y++) {
+      for (let y = 0; y < h; y++) {
         data[0][x][y] = [
           dataset.rgbToGrayscale(image, 0, x, y),
           (x / w) * 2 - 1,
@@ -102,19 +102,19 @@ window.dataset = {
 
   addToDataset: function(image, metaInfos, target, key) {
     // Add the given x, y to either 'train' or 'val'.
-    var set = dataset[key];
+    const set = dataset[key];
 
     if (set.x == null) {
       set.x = [tf.keep(image), tf.keep(metaInfos)];
       set.y = tf.keep(target);
     } else {
-      var oldImage = set.x[0];
+      const oldImage = set.x[0];
       set.x[0] = tf.keep(oldImage.concat(image, 0));
 
-      var oldEyePos = set.x[1];
+      const oldEyePos = set.x[1];
       set.x[1] = tf.keep(oldEyePos.concat(metaInfos, 0));
 
-      var oldY = set.y;
+      const oldY = set.y;
       set.y = tf.keep(oldY.concat(target, 0));
 
       oldImage.dispose();
@@ -133,7 +133,7 @@ window.dataset = {
     target = tf.tidy(function() {
       return tf.tensor1d(target).expandDims(0);
     });
-    var key = dataset.whichDataset();
+    const key = dataset.whichDataset();
 
     image = dataset.convertImage(image);
 
@@ -146,16 +146,16 @@ window.dataset = {
     // Take the latest image from the eyes canvas and add it to our dataset.
     // Takes the coordinates of the mouse.
     tf.tidy(function() {
-      var img = dataset.getImage();
-      var mousePos = mouse.getMousePos();
-      var metaInfos = dataset.getMetaInfos();
+      const img = dataset.getImage();
+      const mousePos = mouse.getMousePos();
+      const metaInfos = dataset.getMetaInfos();
       dataset.addExample(img, metaInfos, mousePos);
     });
   },
 
   toJSON: function() {
-    var tensorToArray = function(t) {
-      var typedArray = t.dataSync();
+    const tensorToArray = function(t) {
+      const typedArray = t.dataSync();
       return Array.prototype.slice.call(typedArray);
     };
 

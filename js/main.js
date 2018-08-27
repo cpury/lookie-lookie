@@ -1,6 +1,6 @@
 $(document).ready(function() {
-  var $target = $('#target');
-  var targetSize = $target.outerWidth();
+  const $target = $('#target');
+  const targetSize = $target.outerWidth();
 
   function moveTarget() {
     // Move the model target to where we predict the user is looking to
@@ -8,9 +8,9 @@ $(document).ready(function() {
       return;
     }
 
-    var prediction = training.getPrediction();
-    var left = prediction[0] * ($('body').width() - targetSize);
-    var top = prediction[1] * ($('body').height() - targetSize);
+    const prediction = training.getPrediction();
+    const left = prediction[0] * ($('body').width() - targetSize);
+    const top = prediction[1] * ($('body').height() - targetSize);
 
     $target.css('left', left + 'px');
     $target.css('top', top + 'px');
@@ -19,8 +19,8 @@ $(document).ready(function() {
   setInterval(moveTarget, 100);
 
   function download(content, fileName, contentType) {
-    var a = document.createElement('a');
-    var file = new Blob([content], {
+    const a = document.createElement('a');
+    const file = new Blob([content], {
       type: contentType,
     });
     a.href = URL.createObjectURL(file);
@@ -32,7 +32,7 @@ $(document).ready(function() {
 
   $('body').keyup(function(e) {
     // On space key:
-    if (e.keyCode == 32 && ui.readyToCollect) {
+    if (e.keyCode === 32 && ui.readyToCollect) {
       dataset.captureExample();
 
       e.preventDefault();
@@ -57,8 +57,8 @@ $(document).ready(function() {
   });
 
   $('#store-data').click(function(e) {
-    var data = dataset.toJSON();
-    var json = JSON.stringify(data);
+    const data = dataset.toJSON();
+    const json = JSON.stringify(data);
     download(json, 'dataset.json', 'text/plain');
   });
 
@@ -67,12 +67,12 @@ $(document).ready(function() {
   });
 
   $('#data-uploader').change(function(e) {
-    var file = e.target.files[0];
-    var reader = new FileReader();
+    const file = e.target.files[0];
+    const reader = new FileReader();
 
     reader.onload = function() {
-      var data = reader.result;
-      var json = JSON.parse(data);
+      const data = reader.result;
+      const json = JSON.parse(data);
       dataset.fromJSON(json);
     };
 
@@ -88,7 +88,7 @@ $(document).ready(function() {
   });
 
   $('#model-uploader').change(async function(e) {
-    var files = e.target.files;
+    const files = e.target.files;
     training.currentModel = await tf.loadModel(
       tf.io.browserFiles([files[0], files[1]]),
     );

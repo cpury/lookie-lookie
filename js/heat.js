@@ -4,26 +4,27 @@ window.heatmap = {
     if (typeof alpha == 'undefined') {
       alpha = 1.0;
     }
-    var hue = ((1 - value) * 120).toString(10);
+    const hue = ((1 - value) * 120).toString(10);
     return 'hsla(' + hue + ',100%,50%,' + alpha + ')';
   },
 
   fillHeatmap: function(data, model, ctx, width, height, radius) {
     // Go through a dataset and fill the context with the corresponding circles.
-    var predictions = model.predict(data.x);
+    const predictions = model.predict(data.x);
 
-    for (var i = 0; i < data.n; i++) {
-      var input = data.x[i];
-      var trueX = data.y.get(i, 0);
-      var trueY = data.y.get(i, 1);
-      var predX = predictions.get(i, 0);
-      var predY = predictions.get(i, 1);
-      var errorX = Math.pow(predX - trueX, 2);
-      var errorY = Math.pow(predY - trueY, 2);
-      var error = Math.min(Math.sqrt(Math.sqrt(errorX + errorY)), 1);
+    let trueX, trueY, predX, predY, errorX, errorY, error, pointX, pointY;
 
-      var pointX = Math.floor((trueX + 0.5) * width);
-      var pointY = Math.floor((trueY + 0.5) * height);
+    for (let i = 0; i < data.n; i++) {
+      trueX = data.y.get(i, 0);
+      trueY = data.y.get(i, 1);
+      predX = predictions.get(i, 0);
+      predY = predictions.get(i, 1);
+      errorX = Math.pow(predX - trueX, 2);
+      errorY = Math.pow(predY - trueY, 2);
+      error = Math.min(Math.sqrt(Math.sqrt(errorX + errorY)), 1);
+
+      pointX = Math.floor((trueX + 0.5) * width);
+      pointY = Math.floor((trueY + 0.5) * height);
 
       ctx.beginPath();
       ctx.fillStyle = this.getHeatColor(error, 0.5);
@@ -36,11 +37,11 @@ window.heatmap = {
     $('#draw-heatmap').prop('disabled', true);
     $('#draw-heatmap').html('In Progress...');
 
-    var heatmap = $('#heatMap')[0];
-    var ctx = heatmap.getContext('2d');
+    const heatmap = $('#heatMap')[0];
+    const ctx = heatmap.getContext('2d');
 
-    var width = $('body').width();
-    var height = $('body').height();
+    const width = $('body').width();
+    const height = $('body').height();
 
     heatmap.width = width;
     heatmap.height = height;
@@ -57,11 +58,8 @@ window.heatmap = {
   clearHeatmap: function() {
     $('#clear-heatmap').prop('disabled', true);
 
-    var heatmap = $('#heatMap')[0];
-    var ctx = heatmap.getContext('2d');
-
-    var width = $('body').width();
-    var height = $('body').height();
+    const heatmap = $('#heatMap')[0];
+    const ctx = heatmap.getContext('2d');
 
     ctx.clearRect(0, 0, heatmap.width, heatmap.height);
     $('#clear-heatmap').prop('disabled', false);
