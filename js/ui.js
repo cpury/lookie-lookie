@@ -32,7 +32,7 @@ window.ui = {
       this.readyToCollect = true;
       this.showInfo(
         "<h3>Let's start! 🙂</h3>" +
-          'Move you mouse over the screen, follow it with your eyes and hit the space key about once per second 👀',
+          'Move you mouse over the screen, follow it with your eyes and hit the space key repeatedly to capture data points 👀',
         true,
       );
     }

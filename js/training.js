@@ -140,12 +140,52 @@ window.training = {
   getPrediction: function() {
     // Return relative x, y where we expect the user to look right now.
     return tf.tidy(function() {
-      var img = dataset.getImage();
+      let img = dataset.getImage();
       img = dataset.convertImage(img);
-      var metaInfos = dataset.getMetaInfos();
-      var prediction = training.currentModel.predict([img, metaInfos]);
+      const metaInfos = dataset.getMetaInfos();
+      const prediction = training.currentModel.predict([img, metaInfos]);
 
       return [prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5];
     });
-  }
+  },
+
+  drawSingleFilter: function(weights, filterId, canvas) {
+    const canvasCtx = canvas.getContext('2d');
+    const kernelSize = weights.shape[0];
+    const pixelSize = canvas.width / kernelSize;
+
+    let x, y;
+    let min = 10000;
+    let max = -10000;
+    let value;
+
+    // First, find min and max:
+    for (x = 0; x < kernelSize; x++) {
+      for (y = 0; y < kernelSize; y++) {
+        value = weights.get(x, y, 0, filterId);
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
+    }
+
+    for (x = 0; x < kernelSize; x++) {
+      for (y = 0; y < kernelSize; y++) {
+        value = weights.get(x, y, 0, filterId);
+        value = ((value - min) / (max - min)) * 255;
+
+        canvasCtx.fillStyle = 'rgb(' + value + ',' + value + ',' + value + ')';
+        canvasCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  },
+
+  visualizePixels: function(canvas) {
+    const model = training.currentModel;
+    const convLayer = model.layers[1];
+    const weights = convLayer.weights[0].read();
+    const bias = convLayer.weights[1].read();
+    const filterId = 1;
+
+    training.drawSingleFilter(weights, filterId, canvas);
+  },
 };
