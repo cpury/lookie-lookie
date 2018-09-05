@@ -1,6 +1,6 @@
 $(document).ready(function() {
-  const video = document.getElementById('webcam');
-  const overlay = document.getElementById('overlay');
+  const video = $('#webcam')[0];
+  const overlay = $('#overlay')[0];
   const overlayCC = overlay.getContext('2d');
   const ctrack = new clm.tracker();
   ctrack.init();
@@ -38,7 +38,7 @@ $(document).ready(function() {
       const resizeFactorY = video.videoHeight / video.height;
 
       // Crop the eyes from the video and paste them in the eyes canvas:
-      const eyesCanvas = document.getElementById('eyes');
+      const eyesCanvas = $('#eyes')[0];
       const eyesCC = eyesCanvas.getContext('2d');
 
       eyesCC.drawImage(
@@ -84,7 +84,7 @@ $(document).ready(function() {
   function getImage() {
     // Capture the current image in the eyes canvas as a tensor.
     return tf.tidy(function() {
-      const image = tf.fromPixels(document.getElementById('eyes'));
+      const image = tf.fromPixels($('#eyes')[0]);
       // Add a batch dimension:
       const batchedImage = image.expandDims(0);
       // Normalize and return it:
@@ -122,7 +122,7 @@ $(document).ready(function() {
         subset.x = tf.keep(image);
         subset.y = tf.keep(mousePos);
       } else {
-        // Concatinate it to existing tensor
+        // Concatenate it to existing tensor
         const oldX = subset.x;
         const oldY = subset.y;
 

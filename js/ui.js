@@ -32,7 +32,7 @@ window.ui = {
       this.readyToCollect = true;
       this.showInfo(
         "<h3>Let's start! 🙂</h3>" +
-          'Move you mouse over the screen, follow it with your eyes and hit the space key repeatedly to capture data points 👀',
+          'Collect data points by moving your mouse over the screen, following the cursor with your eyes and hitting the space key repeatedly 👀',
         true,
       );
     }
@@ -46,10 +46,17 @@ window.ui = {
     if (nTrain >= 2) {
       $('#start-training').prop('disabled', false);
     }
-    if (this.state == 'collecting' && this.nExamples == 20) {
+    if (this.state == 'collecting' && this.nExamples == 5) {
+      this.showInfo(
+        '<h3>Keep going!</h3>' +
+          'You need to collect at least 20 data points to start seeing results.',
+      );
+    }
+    if (this.state == 'collecting' && this.nExamples == 25) {
       this.showInfo(
         '<h3>Great job! 👌</h3>' +
-          "Now that you have a handful of examples, let's train the neural network!",
+          "Now that you have a handful of examples, let's train the neural network!<br> " +
+          'Hit the training button in the top right corner!',
       );
     }
     if (this.state == 'trained' && this.nExamples == 50) {
@@ -77,7 +84,7 @@ window.ui = {
         '<h3>Awesome! 😍</h3>' +
           'The green target should start following your eyes around.<br>' +
           "I guess it's still very bad... 😅<br>" +
-          "Let's collect more training data!",
+          "Let's collect more training data! Keep following the mouse cursor and hitting space.",
       );
     } else if (this.nTrainings == 2) {
       this.state = 'trained_twice';
