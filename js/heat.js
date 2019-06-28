@@ -15,10 +15,10 @@ window.heatmap = {
     let trueX, trueY, predX, predY, errorX, errorY, error, pointX, pointY;
 
     for (let i = 0; i < data.n; i++) {
-      trueX = data.y.get(i, 0);
-      trueY = data.y.get(i, 1);
-      predX = predictions.get(i, 0);
-      predY = predictions.get(i, 1);
+      trueX = data.y.arraySync()[i][0];
+      trueY = data.y.arraySync()[i][1];
+      predX = predictions.arraySync()[i][0];
+      predY = predictions.arraySync()[i][1];
       errorX = Math.pow(predX - trueX, 2);
       errorY = Math.pow(predY - trueY, 2);
       error = Math.min(Math.sqrt(Math.sqrt(errorX + errorY)), 1);

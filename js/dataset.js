@@ -15,7 +15,7 @@ window.dataset = {
   getImage: function() {
     // Capture the current image in the eyes canvas as a tensor.
     return tf.tidy(function() {
-      const image = tf.fromPixels(document.getElementById('eyes'));
+      const image = tf.browser.fromPixels(document.getElementById('eyes'));
       const batchedImage = image.expandDims(0);
       return batchedImage
         .toFloat()
@@ -63,9 +63,9 @@ window.dataset = {
   rgbToGrayscale(image, n, x, y) {
     // Given an rgb tensor, returns a grayscale value.
     // Inspired by http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0029740
-    let r = (image.get(n, x, y, 0) + 1) / 2;
-    let g = (image.get(n, x, y, 1) + 1) / 2;
-    let b = (image.get(n, x, y, 2) + 1) / 2;
+    let r = (image.arraySync()[n][x][y][0] + 1) / 2;
+    let g = (image.arraySync()[n][x][y][1] + 1) / 2;
+    let b = (image.arraySync()[n][x][y][2] + 1) / 2;
 
     // Gamma correction:
     const exponent = 1 / 2.2;

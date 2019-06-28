@@ -89,7 +89,7 @@ $(document).ready(function() {
 
   $('#model-uploader').change(async function(e) {
     const files = e.target.files;
-    training.currentModel = await tf.loadModel(
+    training.currentModel = await tf.loadLayersModel(
       tf.io.browserFiles([files[0], files[1]]),
     );
     ui.onFinishTraining();
