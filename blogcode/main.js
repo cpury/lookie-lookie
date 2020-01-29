@@ -223,17 +223,17 @@ $(document).ready(function() {
       // Convert normalized position back to screen position:
       const targetWidth = $('#target').outerWidth();
       const targetHeight = $('#target').outerHeight();
-      const x =
-        ((prediction.dataSync()[0] + 1) / 2) *
-        ($(window).width() - targetWidth);
-      const y =
-        ((prediction.dataSync()[1] + 1) / 2) *
-        ($(window).height() - targetHeight);
 
-      // Move target there:
-      const $target = $('#target');
-      $target.css('left', x + 'px');
-      $target.css('top', y + 'px');
+      prediction.data().then(prediction => {
+        const x = ((prediction[0] + 1) / 2) * ($(window).width() - targetWidth);
+        const y =
+          ((prediction[1] + 1) / 2) * ($(window).height() - targetHeight);
+
+        // Move target there:
+        const $target = $('#target');
+        $target.css('left', x + 'px');
+        $target.css('top', y + 'px');
+      });
     });
   }
 

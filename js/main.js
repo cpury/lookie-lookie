@@ -8,12 +8,13 @@ $(document).ready(function() {
       return;
     }
 
-    const prediction = training.getPrediction();
-    const left = prediction[0] * ($('body').width() - targetSize);
-    const top = prediction[1] * ($('body').height() - targetSize);
+    training.getPrediction().then(prediction => {
+      const left = prediction[0] * ($('body').width() - targetSize);
+      const top = prediction[1] * ($('body').height() - targetSize);
 
-    $target.css('left', left + 'px');
-    $target.css('top', top + 'px');
+      $target.css('left', left + 'px');
+      $target.css('top', top + 'px');
+    });
   }
 
   setInterval(moveTarget, 100);

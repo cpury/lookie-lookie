@@ -137,16 +137,17 @@ window.training = {
     $('#reset-model').prop('disabled', false);
   },
 
-  getPrediction: function() {
+  getPrediction: async function() {
     // Return relative x, y where we expect the user to look right now.
-    return tf.tidy(function() {
-      let img = dataset.getImage();
-      img = dataset.convertImage(img);
-      const metaInfos = dataset.getMetaInfos();
-      const prediction = training.currentModel.predict([img, metaInfos]);
+    const rawImg = dataset.getImage();
+    const img = await dataset.convertImage(rawImg);
+    const metaInfos = dataset.getMetaInfos();
+    const prediction = training.currentModel.predict([img, metaInfos]);
+    const predictionData = await prediction.data();
 
-      return [prediction.dataSync()[0] + 0.5, prediction.dataSync()[1] + 0.5];
-    });
+    tf.dispose([img, metaInfos, prediction]);
+
+    return [predictionData[0] + 0.5, predictionData[1] + 0.5];
   },
 
   drawSingleFilter: function(weights, filterId, canvas) {
