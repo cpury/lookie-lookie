@@ -8,12 +8,13 @@ $(document).ready(function() {
       return;
     }
 
-    const prediction = training.getPrediction();
-    const left = prediction[0] * ($('body').width() - targetSize);
-    const top = prediction[1] * ($('body').height() - targetSize);
+    training.getPrediction().then(prediction => {
+      const left = prediction[0] * ($('body').width() - targetSize);
+      const top = prediction[1] * ($('body').height() - targetSize);
 
-    $target.css('left', left + 'px');
-    $target.css('top', top + 'px');
+      $target.css('left', left + 'px');
+      $target.css('top', top + 'px');
+    });
   }
 
   setInterval(moveTarget, 100);
@@ -89,7 +90,7 @@ $(document).ready(function() {
 
   $('#model-uploader').change(async function(e) {
     const files = e.target.files;
-    training.currentModel = await tf.loadModel(
+    training.currentModel = await tf.loadLayersModel(
       tf.io.browserFiles([files[0], files[1]]),
     );
     ui.onFinishTraining();

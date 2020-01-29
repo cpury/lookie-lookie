@@ -84,7 +84,7 @@ $(document).ready(function() {
   function getImage() {
     // Capture the current image in the eyes canvas as a tensor.
     return tf.tidy(function() {
-      const image = tf.fromPixels($('#eyes')[0]);
+      const image = tf.browser.fromPixels($('#eyes')[0]);
       // Add a batch dimension:
       const batchedImage = image.expandDims(0);
       // Normalize and return it:
@@ -223,15 +223,17 @@ $(document).ready(function() {
       // Convert normalized position back to screen position:
       const targetWidth = $('#target').outerWidth();
       const targetHeight = $('#target').outerHeight();
-      const x =
-        ((prediction.get(0, 0) + 1) / 2) * ($(window).width() - targetWidth);
-      const y =
-        ((prediction.get(0, 1) + 1) / 2) * ($(window).height() - targetHeight);
 
-      // Move target there:
-      const $target = $('#target');
-      $target.css('left', x + 'px');
-      $target.css('top', y + 'px');
+      prediction.data().then(prediction => {
+        const x = ((prediction[0] + 1) / 2) * ($(window).width() - targetWidth);
+        const y =
+          ((prediction[1] + 1) / 2) * ($(window).height() - targetHeight);
+
+        // Move target there:
+        const $target = $('#target');
+        $target.css('left', x + 'px');
+        $target.css('top', y + 'px');
+      });
     });
   }
 

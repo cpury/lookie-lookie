@@ -116,7 +116,7 @@ window.training = {
           ui.setContent('train-loss', bestTrainLoss.toFixed(5));
           ui.setContent('val-loss', bestValLoss.toFixed(5));
 
-          training.currentModel = await tf.loadModel(bestModelPath);
+          training.currentModel = await tf.loadLayersModel(bestModelPath);
 
           $('#start-training').prop('disabled', false);
           $('#start-training').html('Start Training');
@@ -137,16 +137,17 @@ window.training = {
     $('#reset-model').prop('disabled', false);
   },
 
-  getPrediction: function() {
+  getPrediction: async function() {
     // Return relative x, y where we expect the user to look right now.
-    return tf.tidy(function() {
-      let img = dataset.getImage();
-      img = dataset.convertImage(img);
-      const metaInfos = dataset.getMetaInfos();
-      const prediction = training.currentModel.predict([img, metaInfos]);
+    const rawImg = dataset.getImage();
+    const img = await dataset.convertImage(rawImg);
+    const metaInfos = dataset.getMetaInfos();
+    const prediction = training.currentModel.predict([img, metaInfos]);
+    const predictionData = await prediction.data();
 
-      return [prediction.get(0, 0) + 0.5, prediction.get(0, 1) + 0.5];
-    });
+    tf.dispose([img, metaInfos, prediction]);
+
+    return [predictionData[0] + 0.5, predictionData[1] + 0.5];
   },
 
   drawSingleFilter: function(weights, filterId, canvas) {
@@ -162,7 +163,7 @@ window.training = {
     // First, find min and max:
     for (x = 0; x < kernelSize; x++) {
       for (y = 0; y < kernelSize; y++) {
-        value = weights.get(x, y, 0, filterId);
+        value = weights.arraySync()[x][y][0][filterId];
         if (value < min) min = value;
         if (value > max) max = value;
       }
@@ -170,7 +171,7 @@ window.training = {
 
     for (x = 0; x < kernelSize; x++) {
       for (y = 0; y < kernelSize; y++) {
-        value = weights.get(x, y, 0, filterId);
+        value = weights.arraySync()[x][y][0][filterId];
         value = ((value - min) / (max - min)) * 255;
 
         canvasCtx.fillStyle = 'rgb(' + value + ',' + value + ',' + value + ')';

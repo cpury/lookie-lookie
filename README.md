@@ -3,7 +3,7 @@
 This is a demo project to try out TensorFlow.js. It's a website that learns to
 track your eye movement inside the browser. No backend neccessary.
 
-[Demo](https://cpury.github.io/lookie-lookie/) [Blog post](https://cpury.github.io/learning-where-you-are-looking-at/)
+[Demo](https://cpury.github.io/lookie-lookie/) \| [Blog post](https://cpury.github.io/learning-where-you-are-looking-at/)
 
 ## How to use
 
