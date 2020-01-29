@@ -224,6 +224,7 @@ $(document).ready(function() {
       const targetWidth = $('#target').outerWidth();
       const targetHeight = $('#target').outerHeight();
 
+      // It's okay to run this async, since we don't have to wait for it.
       prediction.data().then(prediction => {
         const x = ((prediction[0] + 1) / 2) * ($(window).width() - targetWidth);
         const y =
