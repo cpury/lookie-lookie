@@ -60,10 +60,9 @@ window.dataset = {
     return Math.random() < 0.2 ? 'val' : 'train';
   },
 
-  async rgbToGrayscale(image, n, x, y) {
-    // Given an rgb tensor, returns a grayscale value.
+  rgbToGrayscale(imageArray, n, x, y) {
+    // Given an rgb array and positions, returns a grayscale value.
     // Inspired by http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0029740
-    const imageArray = await image.array();
     let r = (imageArray[n][x][y][0] + 1) / 2;
     let g = (imageArray[n][x][y][1] + 1) / 2;
     let b = (imageArray[n][x][y][2] + 1) / 2;
@@ -82,6 +81,7 @@ window.dataset = {
   convertImage: async function(image) {
     // Convert to grayscale and add spatial info
     const imageShape = image.shape;
+    const imageArray = await image.array();
     const w = imageShape[1];
     const h = imageShape[2];
 
@@ -91,11 +91,8 @@ window.dataset = {
       data[0][x] = new Array(h);
 
       for (let y = 0; y < h; y++) {
-        promises.push(
-          dataset.rgbToGrayscale(image, 0, x, y).then(imageData => {
-            data[0][x][y] = [imageData, (x / w) * 2 - 1, (y / h) * 2 - 1];
-          }),
-        );
+        const grayValue = dataset.rgbToGrayscale(imageArray, 0, x, y);
+        data[0][x][y] = [grayValue, (x / w) * 2 - 1, (y / h) * 2 - 1];
       }
     }
 
